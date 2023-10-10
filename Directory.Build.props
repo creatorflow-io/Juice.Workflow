@@ -1,0 +1,42 @@
+<Project>
+  <PropertyGroup Label="Product Infomation">
+    <Company>Creatorflow.io</Company>
+    <Product>Juice core</Product>
+    <Copyright>© $(Company). All rights reserved.</Copyright>
+    <Authors>$(Company)</Authors>
+    <JuiceDescription>$(Product) is a media management framework</JuiceDescription>
+    <Description>$(Product) - Media Managment System.</Description>
+    <PackageTags>$(PackageTags); $(Company); $(Product); Media Management</PackageTags>
+    <PackageIconUrl>https://avatars.githubusercontent.com/u/107674950</PackageIconUrl>
+    <RepositoryUrl>https://github.com/creatorflow-io/Juice.Workflow</RepositoryUrl>
+
+    <VersionPrefix>7.0.3</VersionPrefix>
+    <VersionSuffix>local.$([System.DateTime]::Now.ToString(`yyyyMMdd`)).1</VersionSuffix>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Versioning">
+    <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
+    <AppTargetFramework>net6.0;net7.0</AppTargetFramework>
+    <AspNetCoreVersion>2.2.0</AspNetCoreVersion>
+    <MicrosoftExtensionsVersion Condition=" '$(TargetFramework)' == 'net7.0' ">7.0.0</MicrosoftExtensionsVersion>
+    <MicrosoftExtensionsVersion Condition=" '$(TargetFramework)' == 'net6.0' ">6.0.0</MicrosoftExtensionsVersion>
+    <EFVersion>7.0.11</EFVersion>
+    <NpgsqlVersion>7.0.11</NpgsqlVersion>
+    <GrpcVersion>2.57.0</GrpcVersion>
+    <ProtobufVersion>3.24.3</ProtobufVersion>
+    <MediatRVersion>12.1.1</MediatRVersion>
+    <RedisVersion>2.6.122</RedisVersion>
+    <JuiceRefVersion Condition="$(JuiceRefVersion)==''">7.0.3-alpha.*</JuiceRefVersion>
+    <FinbuckleVersion>6.12.0</FinbuckleVersion>
+    <SwashbuckleVersion>6.5.0</SwashbuckleVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Build">
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <EnableSourceLink>false</EnableSourceLink>
+    <BaseIntermediateOutputPath>$(SolutionDir)/build/obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <OutputPath>$(SolutionDir)/build/bin/$(Configuration)/$(MSBuildProjectName)</OutputPath>
+    <PackageLocation>$(SolutionDir)build/publish/$(Configuration)/</PackageLocation>
+  </PropertyGroup>
+
+</Project>

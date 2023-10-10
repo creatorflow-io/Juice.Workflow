@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Description>Workflow's EFCore repositories</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Juice.Workflows\Juice.Workflows.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Juice.EF" Version="$(JuiceRefVersion)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EFVersion)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EFVersion)" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(NpgsqlVersion)" />
+    </ItemGroup>
+
+</Project>

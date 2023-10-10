@@ -1,0 +1,17 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "dev/**" ]
+    paths-ignore:
+      - '*.md'
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    uses: creatorflow-io/shared-workflows/.github/workflows/shared-build.yml@master
+    with:
+       Stage: alpha
+       JuiceRefVersion: 7.0.3
+    secrets: inherit

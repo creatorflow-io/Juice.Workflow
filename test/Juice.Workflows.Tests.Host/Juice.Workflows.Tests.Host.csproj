@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>juice.workflows.tests.host</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Juice.Integrations" Version="$(JuiceRefVersion)" />
+        <PackageReference Include="Juice.MediatR.RequestManager.Redis" Version="$(JuiceRefVersion)" />
+        <PackageReference Include="Juice.EventBus.IntegrationEventLog.EF.PostgreSQL" Version="$(JuiceRefVersion)" />
+        <PackageReference Include="Juice.EventBus.RabbitMQ" Version="$(JuiceRefVersion)" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Juice.Workflows.Api\Juice.Workflows.Api.csproj" />
+        <ProjectReference Include="..\..\src\Juice.Workflows.EF.PostgreSQL\Juice.Workflows.EF.PostgreSQL.csproj" />
+        <ProjectReference Include="..\..\src\Juice.Workflows.EF.SqlServer\Juice.Workflows.EF.SqlServer.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Label="Migrations">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="$(EFVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="$(EFVersion)">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>
