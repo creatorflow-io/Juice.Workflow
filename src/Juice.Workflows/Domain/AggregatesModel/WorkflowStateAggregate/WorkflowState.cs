@@ -5,7 +5,7 @@ namespace Juice.Workflows.Domain.AggregatesModel.WorkflowStateAggregate
     /// <summary>
     /// Represents a workflow's serializable runtime state.
     /// </summary>
-    public class WorkflowState : IAggregrateRoot<INotification>
+    public class WorkflowState : IAggregateRoot<INotification>
     {
         public WorkflowState()
         {
