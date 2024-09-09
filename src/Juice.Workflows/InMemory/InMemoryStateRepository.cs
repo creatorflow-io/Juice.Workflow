@@ -25,7 +25,7 @@ namespace Juice.Workflows.InMemory
                     _states[workflowId].Output
                 )
                 : new WorkflowState());
-        public async Task<OperationResult> PersistAsync(string workflowId, WorkflowState state, CancellationToken token)
+        public async Task<IOperationResult> PersistAsync(string workflowId, WorkflowState state, CancellationToken token)
         {
             foreach (var node in state.NodeSnapshots)
             {

@@ -140,7 +140,7 @@ static void ConfigureIntegrations(IServiceCollection services, IConfiguration co
             options.ExchangeType = "topic";
         });
 
-    services.AddRedisRequestManager(options =>
+    services.AddRedisMediatorRequestManager(options =>
     {
         options.ConnectionString = configuration.GetConnectionString("Redis");
     });

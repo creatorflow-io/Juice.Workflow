@@ -2,7 +2,7 @@
 {
     public static class DefinitionRepositoryExtensions
     {
-        public static async Task<OperationResult> SaveWorkflowContextAsync(this IDefinitionRepository definitionRepo,
+        public static async Task<IOperationResult> SaveWorkflowContextAsync(this IDefinitionRepository definitionRepo,
             WorkflowContext context, string id, string name, bool @override, CancellationToken token)
         {
             try

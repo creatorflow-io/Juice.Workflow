@@ -33,7 +33,7 @@ namespace Juice.Workflows.EF.Repositories
             return state == null
                 ? new WorkflowState() : state;
         }
-        public async Task<OperationResult> PersistAsync(string workflowId, WorkflowState state, CancellationToken token)
+        public async Task<IOperationResult> PersistAsync(string workflowId, WorkflowState state, CancellationToken token)
         {
             try
             {

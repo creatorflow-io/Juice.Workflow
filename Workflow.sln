@@ -33,6 +33,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Juice.Workflows.Tests.Host"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Juice.Workflows.Api.Contracts", "src\Juice.Workflows.Api.Contracts\Juice.Workflows.Api.Contracts.csproj", "{A308B02F-9F03-47BB-BFF7-DF1D5DBF58FD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{D854A3A8-553E-405B-ACB6-CC4214CEE682}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\alpha.yml = .github\workflows\alpha.yml
+		.github\workflows\beta.yml = .github\workflows\beta.yml
+		.github\workflows\build-test.yml = .github\workflows\build-test.yml
+		.github\workflows\nuget-release.yml = .github\workflows\nuget-release.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +102,7 @@ Global
 		{7123CC5D-1DC4-45E8-9E3B-18237540C761} = {D8B637D6-824B-43D3-B4A3-5B43EED4EA49}
 		{87B6FBC8-2C2E-4CAB-94AB-9C383F5E1677} = {70B24DBB-F994-47D6-9525-10B03203740D}
 		{A308B02F-9F03-47BB-BFF7-DF1D5DBF58FD} = {D8B637D6-824B-43D3-B4A3-5B43EED4EA49}
+		{D854A3A8-553E-405B-ACB6-CC4214CEE682} = {87F0DD7D-66AF-4409-BB36-BB0B1E9A55A2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {34388FC1-08EB-42D1-A46D-72835FA4FCA4}

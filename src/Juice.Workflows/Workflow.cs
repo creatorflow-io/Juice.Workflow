@@ -45,7 +45,7 @@ namespace Juice.Workflows
             _workflowContextResolver = workflowContextResolver;
         }
 
-        public async Task<OperationResult<WorkflowExecutionResult>> StartAsync(string workflowId,
+        public async Task<IOperationResult<WorkflowExecutionResult>> StartAsync(string workflowId,
             string? correlationId, string? name, Dictionary<string, object?>? input,
             CancellationToken token = default)
         {
@@ -58,7 +58,7 @@ namespace Juice.Workflows
 
                 if (!createResult.Succeeded)
                 {
-                    return OperationResult.Failed<WorkflowExecutionResult>(createResult.Exception, "Cannot start new workflow. " + (createResult.Message ?? ""));
+                    return createResult.Of<WorkflowExecutionResult>("Cannot start new workflow. ");
                 }
 
                 _workflowContextAccessor.SetWorkflowId(id);
@@ -80,7 +80,7 @@ namespace Juice.Workflows
             }
         }
 
-        public async Task<OperationResult<WorkflowExecutionResult>> ResumeAsync(string workflowId,
+        public async Task<IOperationResult<WorkflowExecutionResult>> ResumeAsync(string workflowId,
             string nodeId, Dictionary<string, object?>? input,
             CancellationToken token = default)
         {
@@ -115,7 +115,7 @@ namespace Juice.Workflows
             return OperationResult.Failed<WorkflowExecutionResult>($"Cannot resolve workflow context to execute {workflowId}");
         }
 
-        private async Task<OperationResult<WorkflowExecutionResult>> ExecuteAsync(
+        private async Task<IOperationResult<WorkflowExecutionResult>> ExecuteAsync(
             WorkflowContext context, string? nodeId = default, CancellationToken token = default)
         {
             try
