@@ -11,13 +11,13 @@
             _dbContext = dbContext;
         }
 
-        public async Task<OperationResult> CreateAsync(WorkflowRecord workflow, CancellationToken token)
+        public async Task<IOperationResult> CreateAsync(WorkflowRecord workflow, CancellationToken token)
         {
             try
             {
                 if (await WorkflowRecords.AnyAsync(d => d.Id == workflow.Id))
                 {
-                    return OperationResult.Failed(default, "Workflow is already exists.");
+                    return OperationResult.Failed("Workflow is already exists.");
                 }
                 _dbContext.Add(workflow);
                 await _dbContext.SaveChangesAsync(token);
@@ -30,13 +30,13 @@
         }
         public Task<WorkflowRecord?> GetAsync(string workflowId, CancellationToken token)
             => WorkflowRecords.FirstOrDefaultAsync(d => d.Id == workflowId, token);
-        public async Task<OperationResult> UpdateAsync(WorkflowRecord workflow, CancellationToken token)
+        public async Task<IOperationResult> UpdateAsync(WorkflowRecord workflow, CancellationToken token)
         {
             try
             {
                 if (!await WorkflowRecords.AnyAsync(d => d.Id == workflow.Id))
                 {
-                    return OperationResult.Failed(default, "Workflow not found.");
+                    return OperationResult.Failed("Workflow not found.");
                 }
                 _dbContext.Update(workflow);
                 await _dbContext.SaveChangesAsync(token);

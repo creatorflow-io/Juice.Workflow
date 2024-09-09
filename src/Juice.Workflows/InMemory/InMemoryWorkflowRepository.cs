@@ -3,7 +3,7 @@
     internal class InMemoryWorkflowRepository : IWorkflowRepository
     {
         private Dictionary<string, WorkflowRecord> _workflowRecords = new Dictionary<string, WorkflowRecord>();
-        public Task<OperationResult> CreateAsync(WorkflowRecord workflow, CancellationToken token)
+        public Task<IOperationResult> CreateAsync(WorkflowRecord workflow, CancellationToken token)
         {
             _workflowRecords[workflow.Id] = workflow;
             return Task.FromResult(OperationResult.Success);
@@ -14,7 +14,7 @@
             return Task.FromResult(_workflowRecords.ContainsKey(workflowId) ? _workflowRecords[workflowId] : null);
         }
 
-        public Task<OperationResult> UpdateAsync(WorkflowRecord workflow, CancellationToken token)
+        public Task<IOperationResult> UpdateAsync(WorkflowRecord workflow, CancellationToken token)
         {
             _workflowRecords[workflow.Id] = workflow;
             return Task.FromResult(OperationResult.Success);

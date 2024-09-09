@@ -35,11 +35,7 @@ namespace Juice.Workflows.Domain.CommandHandlers
                 {
                     if (request.IsCompleted && callbackEvent.IsCompleted)
                     {
-                        return new OperationResult<WorkflowExecutionResult>
-                        {
-                            Message = "Workflow callback event is already completed.",
-                            Succeeded = true
-                        };
+                        return OperationResult.Succeeded<WorkflowExecutionResult>("Workflow callback event is already completed.");
                     }
 
                     var rs = await _mediator.Send(new ResumeWorkflowCommand(callbackEvent.WorkflowId, callbackEvent.NodeId, request.Options));

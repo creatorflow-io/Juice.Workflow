@@ -12,7 +12,7 @@ namespace Juice.Workflows.EF.Repositories
         {
             _dbContext = dbContext;
         }
-        public async Task<OperationResult> CreateUniqueByWorkflowAsync(EventRecord @event, CancellationToken token)
+        public async Task<IOperationResult> CreateUniqueByWorkflowAsync(EventRecord @event, CancellationToken token)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace Juice.Workflows.EF.Repositories
         }
         public async Task<EventRecord?> GetAsync(Guid id, CancellationToken token)
             => await EventRecords.FirstOrDefaultAsync(e => e.Id == id, token);
-        public async Task<OperationResult> UpdateAsync(EventRecord @event, CancellationToken token)
+        public async Task<IOperationResult> UpdateAsync(EventRecord @event, CancellationToken token)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace Juice.Workflows.EF.Repositories
             }
         }
 
-        public async Task<OperationResult> RemoveAsync(EventRecord @event, CancellationToken token)
+        public async Task<IOperationResult> RemoveAsync(EventRecord @event, CancellationToken token)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace Juice.Workflows.EF.Repositories
             }
         }
 
-        public async Task<OperationResult> UpdateStartNodesAsync(string workflowId, EventRecord[] events, CancellationToken token)
+        public async Task<IOperationResult> UpdateStartNodesAsync(string workflowId, EventRecord[] events, CancellationToken token)
         {
             try
             {

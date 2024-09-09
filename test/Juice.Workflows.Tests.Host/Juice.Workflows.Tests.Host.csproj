@@ -8,10 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Juice.Integrations" Version="$(JuiceRefVersion)" />
-        <PackageReference Include="Juice.MediatR.RequestManager.Redis" Version="$(JuiceRefVersion)" />
-        <PackageReference Include="Juice.EventBus.IntegrationEventLog.EF.PostgreSQL" Version="$(JuiceRefVersion)" />
-        <PackageReference Include="Juice.EventBus.RabbitMQ" Version="$(JuiceRefVersion)" />
+        <PackageReference Include="Juice.Integrations" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.MediatR.RequestManager.Redis" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.EventBus.IntegrationEventLog.EF.PostgreSQL" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.EventBus.RabbitMQ" Version="$(JuiceVersion)" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Juice.Workflows.Api\Juice.Workflows.Api.csproj" />

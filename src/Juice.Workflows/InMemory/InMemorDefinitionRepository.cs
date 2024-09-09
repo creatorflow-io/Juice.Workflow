@@ -7,13 +7,13 @@
         {
 
         }
-        public Task<OperationResult> CreateAsync(WorkflowDefinition workflowDefinition, CancellationToken token)
+        public Task<IOperationResult> CreateAsync(WorkflowDefinition workflowDefinition, CancellationToken token)
         {
             _definitions[workflowDefinition.Id] = workflowDefinition;
             return Task.FromResult(OperationResult.Success);
         }
 
-        public Task<OperationResult> DeleteAsync(string definitionId, CancellationToken token)
+        public Task<IOperationResult> DeleteAsync(string definitionId, CancellationToken token)
         {
             if (_definitions.ContainsKey(definitionId))
             {
@@ -25,7 +25,7 @@
             => Task.FromResult(_definitions.ContainsKey(definitionId));
         public Task<WorkflowDefinition?> GetAsync(string definitionId, CancellationToken token)
             => Task.FromResult(_definitions.ContainsKey(definitionId) ? _definitions[definitionId] : default);
-        public Task<OperationResult> UpdateAsync(WorkflowDefinition workflowDefinition, CancellationToken token)
+        public Task<IOperationResult> UpdateAsync(WorkflowDefinition workflowDefinition, CancellationToken token)
         {
             _definitions[workflowDefinition.Id] = workflowDefinition;
             return Task.FromResult(OperationResult.Success);

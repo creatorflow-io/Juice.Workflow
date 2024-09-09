@@ -11,7 +11,7 @@
         <ProjectReference Include="..\Juice.Workflows\Juice.Workflows.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Juice.EventBus" Version="$(JuiceRefVersion)" />
+        <PackageReference Include="Juice.EventBus" Version="$(JuiceVersion)" />
     </ItemGroup>
 
     <ItemGroup Label="gRPC">
