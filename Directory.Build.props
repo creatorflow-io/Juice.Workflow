@@ -10,13 +10,13 @@
     <PackageIconUrl>https://avatars.githubusercontent.com/u/107674950</PackageIconUrl>
     <RepositoryUrl>https://github.com/creatorflow-io/Juice.Workflow</RepositoryUrl>
 
-    <VersionPrefix>7.0.3</VersionPrefix>
+    <VersionPrefix>8.0.0</VersionPrefix>
     <VersionSuffix>local.$([System.DateTime]::Now.ToString(`yyyyMMdd`)).1</VersionSuffix>
   </PropertyGroup>
 
   <PropertyGroup Label="Versioning">
     <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
-    <AppTargetFramework>net6.0;net8.0</AppTargetFramework>
+    <AppTargetFramework>net8.0</AppTargetFramework>
     <MicrosoftExtensionsVersion>8.0.*</MicrosoftExtensionsVersion>
     <GrpcVersion>2.57.0</GrpcVersion>
     <ProtobufVersion>3.24.3</ProtobufVersion>
@@ -27,7 +27,7 @@
     <XUnitVersion>2.9.*</XUnitVersion>
     <TestSdk>17.11.*</TestSdk>
     <JuiceRefSuffix Condition="'$(JuiceRefSuffix)' == '' And '$(CI)' == ''">-alpha.*</JuiceRefSuffix>
-    <JuiceVersion>7.0.*$(JuiceRefSuffix)</JuiceVersion>
+    <JuiceVersion>8.0.*$(JuiceRefSuffix)</JuiceVersion>
   </PropertyGroup>
 
 

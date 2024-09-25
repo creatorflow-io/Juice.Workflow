@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    uses: creatorflow-io/shared-workflows/.github/workflows/shared-pack.yml@master
+    uses: creatorflow-io/shared-workflows/.github/workflows/shared-pack.yml@net8
     with:
        Stage: alpha
     secrets: inherit
