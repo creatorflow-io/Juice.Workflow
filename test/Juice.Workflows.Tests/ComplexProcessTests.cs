@@ -450,7 +450,7 @@ namespace Juice.Workflows.Tests
                     var context = result.Context;
                     context.ResolvedBy.Should().Be(typeof(Bpmn.Builder.WorkflowContextBuilder).FullName);
 
-                    var createResult = await definitionRepo.SaveWorkflowContextAsync(context, "diagram", context.Name, true, default);
+                    var createResult = await definitionRepo.SaveWorkflowContextAsync(context, "diagram", context.Name!, true, default);
                     _output.WriteLine(createResult.ToString());
                     createResult.Succeeded.Should().BeTrue();
 

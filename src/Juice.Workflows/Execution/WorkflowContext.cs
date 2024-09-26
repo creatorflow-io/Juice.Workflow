@@ -191,7 +191,7 @@ namespace Juice.Workflows.Execution
                 ));
         }
 
-        public NodeContext? GetNode(string id)
+        public NodeContext? GetNode(string? id)
         {
             return string.IsNullOrEmpty(id) || !Nodes.ContainsKey(id) ? null : Nodes[id];
         }
@@ -269,7 +269,7 @@ namespace Juice.Workflows.Execution
         public void CancelBlockingEvent(string id)
         {
             var snapshot = NodeSnapshots.FirstOrDefault(n => n.Id == id);
-            var node = GetNode(id).Node;
+            var node = GetNode(id)?.Node;
             if (snapshot != null
                 && snapshot.Status == WorkflowStatus.Halted
                 && node is IIntermediate
@@ -283,7 +283,7 @@ namespace Juice.Workflows.Execution
         {
             if (!FlowSnapshots.Any(f => f.Id == flow.Record.Id))
             {
-                FlowSnapshots.Add(new FlowSnapshot { Id = flow.Record.Id, Name = flow.Record.Name });
+                FlowSnapshots.Add(new FlowSnapshot { Id = flow.Record.Id, Name = flow.Record.Name ??""});
             }
         }
 
@@ -388,21 +388,21 @@ namespace Juice.Workflows.Execution
         /// </summary>
         public bool IsFinished
             => ProcessSnapshots.All(p => p.Status == WorkflowStatus.Finished);
-        public bool HasFinishSignal(string processId)
+        public bool HasFinishSignal(string? processId)
             => ProcessSnapshots.Any(p => p.Id == processId && p.Status == WorkflowStatus.Finished);
-        public void Finish(string processId)
+        public void Finish(string? processId)
             => ProcessSnapshots.Single(p => p.Id == processId).SetStatus(WorkflowStatus.Finished);
         public bool HasTerminated
             => ProcessSnapshots.Any(p => p.Status == WorkflowStatus.Aborted);
-        public bool HasTerminateSignal(string processId)
+        public bool HasTerminateSignal(string? processId)
             => ProcessSnapshots.Any(p => p.Id == processId && p.Status == WorkflowStatus.Aborted);
-        public void Terminate(string processId)
+        public void Terminate(string? processId)
             => ProcessSnapshots.Single(p => p.Id == processId).SetStatus(WorkflowStatus.Aborted);
-        public void Start(string processId)
+        public void Start(string? processId)
             => ProcessSnapshots.Single(p => p.Id == processId).SetStatus(WorkflowStatus.Executing);
         public bool HasFaulted
             => ProcessSnapshots.Any(p => p.Status == WorkflowStatus.Faulted);
-        public void Fault(string processId)
+        public void Fault(string? processId)
             => ProcessSnapshots.Single(p => p.Id == processId).SetStatus(WorkflowStatus.Faulted);
 
         public IEnumerable<ProcessRecord> IdlingProcesses

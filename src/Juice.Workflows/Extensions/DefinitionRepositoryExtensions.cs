@@ -11,7 +11,7 @@
                 if (!existing || @override)
                 {
                     var definition = existing ?
-                            await definitionRepo.GetAsync(id, token)
+                            await definitionRepo.GetAsync(id, token) ?? new WorkflowDefinition(id, name)
                             : new WorkflowDefinition(id, name);
                     definition.SetData(context.Processes,
                         context.Nodes.Values.Select(n => new NodeData(n.Record, n.Node.GetType().Name,

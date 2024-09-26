@@ -20,7 +20,7 @@
             {
                 // if EndEvent is not inside sub-process
                 workflowContext.AddDomainEvent(new ProcessFinishedDomainEvent(node, WorkflowStatus.Finished));
-                workflowContext.Finish(node.Record.ProcessIdRef);
+                workflowContext.Finish(node.Record.ProcessIdRef!);
             }
             _logger.LogInformation(node.Record.Name + " throwed");
             return Task.FromResult(Outcomes("Throwed"));

@@ -2,7 +2,7 @@
 {
     public record NodeData
     {
-        public NodeData(NodeRecord node, string typeName, bool isStart, Dictionary<string, object> properties)
+        public NodeData(NodeRecord node, string typeName, bool isStart, Dictionary<string, object?> properties)
         {
             NodeRecord = node;
             TypeName = typeName;
@@ -14,7 +14,7 @@
 
         public NodeRecord NodeRecord { get; init; }
 
-        public Dictionary<string, object> Properties { get; init; }
+        public Dictionary<string, object?> Properties { get; init; }
 
         public string TypeName { get; init; }
     }

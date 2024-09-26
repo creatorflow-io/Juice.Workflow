@@ -13,7 +13,10 @@ namespace Juice.Workflows
             }
             private set
             {
-                _workflowContextAccessor.SetContext(value);
+                if(value != null)
+                {
+                    _workflowContextAccessor.SetContext(value);
+                }
             }
         }
 

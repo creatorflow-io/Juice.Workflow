@@ -4,14 +4,14 @@ using Juice.Workflows.Domain.Commands;
 namespace Juice.Workflows.Api.Domain.CommandHandlers
 {
     internal class StartTimerIntermediateCatchEventCommandHandler
-        : IRequestHandler<StartEventCommand<TimerIntermediateCatchEvent>, IOperationResult>
+                : IRequestHandler<StartEventCommand<TimerIntermediateCatchEvent>, IOperationResult>
     {
         private EventQueue _queue;
         private ILogger _logger;
-        public StartTimerIntermediateCatchEventCommandHandler(ILogger<StartTimerIntermediateCatchEventCommandHandler> logger,
-            EventQueue eventQueue)
+
+        public StartTimerIntermediateCatchEventCommandHandler(ILoggerFactory logger, EventQueue eventQueue)
         {
-            _logger = logger;
+            _logger = logger.CreateLogger(GetType());
             _queue = eventQueue;
         }
 

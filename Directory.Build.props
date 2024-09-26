@@ -16,8 +16,7 @@
 
   <PropertyGroup Label="Versioning">
     <LibraryTargetFramework>netstandard2.1</LibraryTargetFramework>
-    <AppTargetFramework>net8.0</AppTargetFramework>
-    <MicrosoftExtensionsVersion>8.0.*</MicrosoftExtensionsVersion>
+    <AppTargetFramework>net8.0;net9.0</AppTargetFramework>
     <GrpcVersion>2.57.0</GrpcVersion>
     <ProtobufVersion>3.24.3</ProtobufVersion>
     <MediatRVersion>12.4.*</MediatRVersion>
@@ -31,14 +30,17 @@
   </PropertyGroup>
 
 
-  <PropertyGroup Label="Versioning" Condition="'$(TargetFramework)' == 'net6.0'">
-    <EFVersion>7.0.*</EFVersion>
-    <NpgsqlVersion>7.0.*</NpgsqlVersion>
+  <PropertyGroup Label="Versioning" Condition="'$(TargetFramework)' == 'net9.0'">
+    <MicrosoftExtensionsVersion>9.0.*-rc.*</MicrosoftExtensionsVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Versioning" Condition="'$(TargetFramework)' == 'net8.0'">
-    <EFVersion>8.0.*</EFVersion>
-    <NpgsqlVersion>8.0.*</NpgsqlVersion>
+    <MicrosoftExtensionsVersion>8.0.*</MicrosoftExtensionsVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Versioning">
+    <EFVersion>$(MicrosoftExtensionsVersion)</EFVersion>
+    <NpgsqlVersion>$(MicrosoftExtensionsVersion)</NpgsqlVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Build">

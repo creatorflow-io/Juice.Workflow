@@ -6,14 +6,14 @@ namespace Juice.Workflows.Builder
 
     public abstract class WorkflowContextBuilderBase
     {
-        protected Dictionary<string, NodeRecord> _nodeRecords = new Dictionary<string, NodeRecord>();
-        protected Dictionary<string, INode> _nodes = new Dictionary<string, INode>();
-        protected Dictionary<string, FlowRecord> _flowRecords = new Dictionary<string, FlowRecord>();
-        protected Dictionary<string, IFlow> _flows = new Dictionary<string, IFlow>();
+        protected Dictionary<string, NodeRecord> _nodeRecords = [];
+        protected Dictionary<string, INode> _nodes = [];
+        protected Dictionary<string, FlowRecord> _flowRecords = [];
+        protected Dictionary<string, IFlow> _flows = [];
 
-        protected Dictionary<string, ProcessRecord> _processRecords = new Dictionary<string, ProcessRecord>();
+        protected Dictionary<string, ProcessRecord> _processRecords = [];
 
-        protected Dictionary<string, Dictionary<string, object>> _properties = new Dictionary<string, Dictionary<string, object>>();
+        protected Dictionary<string, Dictionary<string, object?>> _properties = [];
 
         protected IStringIdGenerator _idGenerator;
         protected INodeLibrary _nodeLibrary;
@@ -88,7 +88,7 @@ namespace Juice.Workflows.Builder
             dest.AddIncoming(record.Id);
         }
 
-        protected (INode Node, NodeRecord Record) CreateNode(string type, string? name, string processId)
+        protected (INode Node, NodeRecord Record) CreateNode(string type, string? name, string? processId)
         {
             var node = _nodeLibrary.CreateInstance(type, _serviceProvider);
             var nodeId = node is IGateway ? NewGatewayId()

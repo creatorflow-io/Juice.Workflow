@@ -7,13 +7,11 @@ namespace Juice.Workflows.Domain.AggregatesModel.WorkflowAggregate
     /// </summary>
     public class WorkflowRecord : Entity<string>
     {
-        public WorkflowRecord() { }
         public WorkflowRecord(string id, string definitionId, string? correlationId, string? name)
+            : base(id, name ?? definitionId)
         {
-            Id = id;
             DefinitionId = definitionId;
             CorrelationId = correlationId;
-            Name = name ?? definitionId;
         }
 
         public string DefinitionId { get; init; }

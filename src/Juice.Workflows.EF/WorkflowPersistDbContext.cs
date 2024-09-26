@@ -131,7 +131,7 @@ namespace Juice.Workflows.EF
                 entity.Property(e => e.NodeStates)
                  .UsePropertyAccessMode(PropertyAccessMode.PreferFieldDuringConstruction)
                  .HasConversion(s => JsonConvert.SerializeObject(s),
-                     s => JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, object>>>(s) ?? new Dictionary<string, Dictionary<string, object>>(),
+                     s => JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, object?>>>(s) ?? new Dictionary<string, Dictionary<string, object?>>(),
                      dictObjectValueComparer
                      );
 

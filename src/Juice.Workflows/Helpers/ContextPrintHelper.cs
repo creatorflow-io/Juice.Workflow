@@ -107,7 +107,7 @@ namespace Juice.Workflows.Helpers
                 if (_printedNodes.ContainsKey(flow.Record.DestinationRef))
                 {
                     // Directly flow from gateway to gateway
-                    if (next.Node is IGateway && context.GetNode(flow.Record.SourceRef).Node is IGateway)
+                    if (next?.Node is IGateway && context.GetNode(flow.Record.SourceRef)?.Node is IGateway)
                     {
                         currentRow += 3;
                         Vertical(Row(currentRow - 1), nodeCenterPoint);

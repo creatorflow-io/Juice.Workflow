@@ -24,7 +24,7 @@
                 workflowContext.Name);
             return Task.FromResult(Noop(Localizer[message, node.Record.Name,
                 node.Record.Name,
-                workflowContext.Name]));
+                workflowContext.Name??"Unk"]));
         }
         public override Task<NodeExecutionResult> ResumeAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token) => throw new NotImplementedException();
     }

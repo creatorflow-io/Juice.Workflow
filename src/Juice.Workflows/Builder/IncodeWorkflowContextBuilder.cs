@@ -98,7 +98,7 @@ namespace Juice.Workflows.Builder
             return this;
         }
 
-        public WorkflowContextBuilder SetProperties(Dictionary<string, object> properties)
+        public WorkflowContextBuilder SetProperties(Dictionary<string, object?> properties)
         {
             if (string.IsNullOrEmpty(_currentNodeId))
             {

@@ -34,13 +34,15 @@
                     {
                         result = await StartProcessAsync(workflowContext, process, token);
                     }
-                    return result;
+                    if (result != null)
+                    {
+                        return result;
+                    }
                 }
-                else
-                {
-                    var start = workflowContext.GetStartNode(default);
-                    return await ExecuteAsync(workflowContext, start, token);
-                }
+
+                var start = workflowContext.GetStartNode(default);
+                return await ExecuteAsync(workflowContext, start, token);
+
             }
             else
             {

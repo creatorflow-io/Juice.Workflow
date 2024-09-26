@@ -12,7 +12,7 @@
             Name = name;
         }
 
-        public NodeRecord(string id, string name, string processIdRef) : this(id, name)
+        public NodeRecord(string id, string name, string? processIdRef) : this(id, name)
         {
             ProcessIdRef = processIdRef;
         }
@@ -39,7 +39,7 @@
         /// <summary>
         /// Process/sub-process reference
         /// </summary>
-        public string ProcessIdRef { get; init; }
+        public string? ProcessIdRef { get; init; }
 
         /// <summary>
         /// Default outgoing flow

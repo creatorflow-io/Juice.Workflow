@@ -5,10 +5,7 @@ namespace Juice.Workflows.Domain.AggregatesModel.DefinitionAggregate
 {
     public class WorkflowDefinition : AuditAggregrateRoot<string, INotification>
     {
-
-        public WorkflowDefinition() { }
-
-        public WorkflowDefinition(string id, string name)
+        public WorkflowDefinition(string id, string name):base(id, name)
         {
             Id = id;
             Name = name;
