@@ -73,9 +73,9 @@ namespace Juice.Workflows.Helpers
             }
             else
             {
-                topRow.Replace(' ', '-', col, _nodeWidth);
+                topRow.Replace(' ', '-', col+1, _nodeWidth-1);
                 PrintActivity(node, midRow, col);
-                btRow.Replace(' ', '-', col, _nodeWidth);
+                btRow.Replace(' ', '-', col+1, _nodeWidth-1);
 
                 padWidth = _nodeWidth / 2 + 1;
                 currentPoint += _nodeWidth;
@@ -143,7 +143,7 @@ namespace Juice.Workflows.Helpers
                         {
                             Vertical(Row(j), nodeCenterPoint);
                         }
-                        var endFlow = Fork(context, flow, currentRow, currentPoint, padWidth);
+                        var endFlow = Fork(context, flow, currentRow, currentPoint, padWidth); //
 
                         if (next != null)
                         {
@@ -258,7 +258,9 @@ namespace Juice.Workflows.Helpers
         }
         private void Vertical(StringBuilder row, int point)
         {
-            row.Replace(' ', '|', point, 1).Replace('-', '|', point, 1);
+            row.Replace(' ', '|', point, 1)
+                //.Replace('-', '|', point, 1)
+                ;
         }
         private void HalfVertical(StringBuilder row, int point)
         {
@@ -291,19 +293,21 @@ namespace Juice.Workflows.Helpers
         private int Fork(WorkflowContext context, FlowContext flow, int row, int currentPoint, int padWidth)
         {
             var centerPoint = currentPoint - padWidth;
+            var isFromGateway = context.GetNode(flow.Record.SourceRef).Node is IGateway;
+            var isToGateway = context.GetNode(flow.Record.DestinationRef).Node is IGateway;
+            var startPoint = isFromGateway ? currentPoint - 2 : centerPoint;
             var midRow = Row(row);
             Row(row - 2).Replace(' ', '|', centerPoint, 1);
             Row(row - 1).Replace(' ', '|', centerPoint, 1);
-            midRow.Replace(' ', '\'', currentPoint - 2, 1)
+            midRow.Replace(' ', '\'', startPoint, 1)
                 .Replace(' ', '-', currentPoint - 1, 1);
 
-            if (context.GetNode(flow.Record.SourceRef).Node is IGateway
-                && context.GetNode(flow.Record.DestinationRef).Node is IGateway)
+            if (isFromGateway && isToGateway)
             {
                 Merge(context, flow, row, currentPoint, padWidth);
                 return _printedNodes[flow.Record.DestinationRef].Point;
             }
-            return PrintFlow(context, flow, midRow, currentPoint);
+            return PrintFlow(context, flow, midRow, startPoint);
         }
         private void PrintEvent(NodeContext node, StringBuilder builder, int start)
         {

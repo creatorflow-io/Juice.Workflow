@@ -26,6 +26,6 @@
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore.Server" Version="$(GrpcVersion)" />
         <PackageReference Include="Juice.Integrations" Version="$(JuiceVersion)" />
-        <PackageReference Include="Juice.Timers.Api.Contracts" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Timers.Api.Contracts" Version="$(JuiceTimer)" />
     </ItemGroup>
 </Project>

@@ -6,14 +6,14 @@ namespace Juice.Workflows.Builder
 
     public abstract class WorkflowContextBuilderBase
     {
-        protected Dictionary<string, NodeRecord> _nodeRecords = [];
-        protected Dictionary<string, INode> _nodes = [];
-        protected Dictionary<string, FlowRecord> _flowRecords = [];
-        protected Dictionary<string, IFlow> _flows = [];
+        protected Dictionary<string, NodeRecord> _nodeRecords = new();
+        protected Dictionary<string, INode> _nodes = new();
+        protected Dictionary<string, FlowRecord> _flowRecords = new();
+        protected Dictionary<string, IFlow> _flows = new();
 
-        protected Dictionary<string, ProcessRecord> _processRecords = [];
+        protected Dictionary<string, ProcessRecord> _processRecords = new();
 
-        protected Dictionary<string, Dictionary<string, object?>> _properties = [];
+        protected Dictionary<string, Dictionary<string, object?>> _properties = new();
 
         protected IStringIdGenerator _idGenerator;
         protected INodeLibrary _nodeLibrary;
