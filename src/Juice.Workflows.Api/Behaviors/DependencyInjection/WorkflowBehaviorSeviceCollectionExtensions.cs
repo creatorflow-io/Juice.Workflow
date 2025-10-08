@@ -1,5 +1,4 @@
 ﻿using Juice.Workflows.Api.Behaviors;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Juice.Workflows.Api

@@ -1,4 +1,6 @@
-﻿using Juice.Workflows.Bpmn;
+﻿using Juice.Workflows.Api;
+using Juice.Workflows.Api.Domain.CommandHandlers;
+using Juice.Workflows.Bpmn;
 using Juice.Workflows.Domain.AggregatesModel.DefinitionAggregate;
 using Juice.Workflows.Extensions;
 using Juice.Workflows.Yaml;
@@ -12,6 +14,7 @@ namespace Juice.Workflows.Tests
         public ComplexProcessTests(ITestOutputHelper output)
         {
             _output = output;
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
         }
 
         /*
@@ -65,6 +68,13 @@ namespace Juice.Workflows.Tests
                     options.RegisterServicesFromAssemblyContaining<StartEvent>();
                     options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
                 });
+
+                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
+                {
+                    options.BrokerName = "workflow_exchange";
+                    options.SubscriptionClientName = "juice_wf_xunit_1";
+                });
+
                 services.AddSingleton<EventQueue>();
 
                 services.RegisterWorkflow(workflowId, builder =>
@@ -134,6 +144,12 @@ namespace Juice.Workflows.Tests
                 services.AddWorkflowServices()
                     .AddInMemoryReposistories();
                 services.RegisterNodes(typeof(FailureTask));
+
+                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
+                {
+                    options.BrokerName = "workflow_exchange";
+                    options.SubscriptionClientName = "juice_wf_xunit_2";
+                });
 
                 services.RegisterWorkflow(workflowId, builder =>
                 {
@@ -209,6 +225,12 @@ namespace Juice.Workflows.Tests
                     .AddInMemoryReposistories();
                 services.RegisterNodes(typeof(FailureTask));
 
+                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
+                {
+                    options.BrokerName = "workflow_exchange";
+                    options.SubscriptionClientName = "juice_wf_xunit_3";
+                });
+
                 services.RegisterWorkflow(workflowId, builder =>
                 {
                     builder
@@ -275,8 +297,15 @@ namespace Juice.Workflows.Tests
                 {
                     options.RegisterServicesFromAssemblyContaining<StartEvent>();
                     options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
+                    options.RegisterServicesFromAssemblyContaining<StartBoundaryTimerEventCommandHandler>();
                 });
                 services.AddSingleton<EventQueue>();
+
+                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
+                {
+                    options.BrokerName = "workflow_exchange";
+                    options.SubscriptionClientName = "juice_wf_xunit_4";
+                });
 
                 services.AddWorkflowServices()
                     .AddInMemoryReposistories();
@@ -355,6 +384,12 @@ namespace Juice.Workflows.Tests
                     .AddInMemoryReposistories();
                 services.RegisterNodes(typeof(FailureTask));
 
+                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
+                {
+                    options.BrokerName = "workflow_exchange";
+                    options.SubscriptionClientName = "juice_wf_xunit_5";
+                });
+
                 services.RegisterYamlWorkflows();
 
                 services.RegisterWorkflow("incodewf", builder =>
@@ -428,6 +463,12 @@ namespace Juice.Workflows.Tests
                 services.AddWorkflowServices()
                     .RegisterDbWorkflows()
                     .AddInMemoryReposistories();
+
+                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
+                {
+                    options.BrokerName = "workflow_exchange";
+                    options.SubscriptionClientName = "juice_wf_xunit_6";
+                });
 
                 services.RegisterNodes(typeof(FailureTask));
 

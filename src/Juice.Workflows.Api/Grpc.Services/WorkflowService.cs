@@ -2,7 +2,6 @@
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
 using Juice.Workflows.Grpc;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 

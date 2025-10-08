@@ -10,7 +10,7 @@ namespace Juice.Workflows.Domain.CommandHandlers
         {
             _eventRepository = eventRepository;
         }
-        public async Task<IOperationResult> Handle(InitWorkflowStartEventCommand request, CancellationToken cancellationToken)
+        public async ValueTask<IOperationResult> Handle(InitWorkflowStartEventCommand request, CancellationToken cancellationToken)
         {
             return await _eventRepository.UpdateStartNodesAsync(request.WorkflowId,
                 request.StartNodes.Select(n => new EventRecord(request.WorkflowId, n.Id, true, default, n.Name)).ToArray(),

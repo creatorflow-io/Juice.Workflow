@@ -1,4 +1,5 @@
 ﻿using Juice.Workflows.Builder;
+using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -67,6 +68,7 @@ namespace Juice.Workflows
             services.TryAddSingleton<IWorkflowStateRepository, InMemoryStateRepository>();
             services.TryAddSingleton<IWorkflowRepository, InMemoryWorkflowRepository>();
             services.TryAddSingleton<IDefinitionRepository, InMemorDefinitionRepository>();
+            services.TryAddSingleton<IEventRepository, InMemoryEventRepository>();
             return services;
         }
 

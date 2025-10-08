@@ -1,5 +1,4 @@
-﻿using Juice.EventBus;
-using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
+﻿using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
 using Juice.Workflows.Nodes.Activities;
@@ -8,12 +7,12 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
 {
     public class StartSendTaskCommandHandler : StartTaskCommandHandlerBase<SendTask>
     {
-        public StartSendTaskCommandHandler(IEventBus eventBus, IEventRepository eventRepository) : base(eventBus, eventRepository)
+        public StartSendTaskCommandHandler(IWorkflowEventBus eventBus, IEventRepository eventRepository) : base(eventBus, eventRepository)
         {
 
         }
 
-        public override async Task<IOperationResult> Handle(StartTaskCommand<SendTask> request, CancellationToken cancellationToken)
+        public override async ValueTask<IOperationResult> Handle(StartTaskCommand<SendTask> request, CancellationToken cancellationToken)
         {
             try
             {

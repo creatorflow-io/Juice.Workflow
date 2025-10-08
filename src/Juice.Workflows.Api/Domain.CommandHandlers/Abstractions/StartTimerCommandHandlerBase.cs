@@ -4,7 +4,6 @@ using Juice.Timers.Api.IntegrationEvents.Events;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
 using Juice.Workflows.Nodes;
-using MediatR;
 
 namespace Juice.Workflows.Api.Domain.CommandHandlers
 {
@@ -20,7 +19,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
             _eventBus = eventBus;
             _eventRepository = eventRepository;
         }
-        public override async Task<IOperationResult> Handle(StartEventCommand<TEvent> request, CancellationToken cancellationToken)
+        public override async ValueTask<IOperationResult> Handle(StartEventCommand<TEvent> request, CancellationToken cancellationToken)
         {
             try
             {

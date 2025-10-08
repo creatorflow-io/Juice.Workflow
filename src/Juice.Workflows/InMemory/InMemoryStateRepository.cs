@@ -1,5 +1,4 @@
-﻿using MediatR;
-
+﻿
 namespace Juice.Workflows.InMemory
 {
     internal class InMemoryStateRepository : IWorkflowStateRepository

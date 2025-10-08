@@ -1,8 +1,6 @@
 ﻿using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
-using Juice.Workflows.Domain.CommandHandlers;
 using Juice.Workflows.Domain.Commands;
 using Juice.Workflows.Nodes.Activities;
-using MediatR;
 
 namespace Juice.Workflows.Api.Domain.CommandHandlers
 {

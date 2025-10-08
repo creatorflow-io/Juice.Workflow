@@ -7,11 +7,11 @@ namespace Juice.Workflows.Api
 {
     public static class WfApiEventBusExtensions
     {
-        public static void InitWorkflowIntegrationEvents(this IEventBus eventBus)
+        public static async Task InitWorkflowIntegrationEventsAsync(this IEventBus eventBus)
         {
-            eventBus.Subscribe<TimerExpiredIntegrationEvent, TimerExpiredIntegrationEventHandler>();
+            await eventBus.SubscribeAsync<TimerExpiredIntegrationEvent, TimerExpiredIntegrationEventHandler>();
 
-            eventBus.Subscribe<MessageCatchIntegrationEvent, MessageCatchIntegrationEventHandler>("wfcatch.*.#");
+            await eventBus.SubscribeAsync<MessageCatchIntegrationEvent, MessageCatchIntegrationEventHandler>("wfcatch.*.#");
         }
     }
 }

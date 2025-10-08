@@ -2,7 +2,6 @@
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Juice.Workflows.Api.IntegrationEvents.Handlers

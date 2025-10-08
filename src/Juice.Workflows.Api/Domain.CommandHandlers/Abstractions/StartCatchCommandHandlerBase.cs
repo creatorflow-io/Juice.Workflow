@@ -1,7 +1,6 @@
 ﻿using Juice.Extensions;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
-using MediatR;
 
 namespace Juice.Workflows.Api.Domain.CommandHandlers
 {
@@ -14,7 +13,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
             _eventRepository = eventRepository;
         }
 
-        public virtual async Task<IOperationResult> Handle(TRequest request, CancellationToken cancellationToken)
+        public virtual async ValueTask<IOperationResult> Handle(TRequest request, CancellationToken cancellationToken)
         {
             try
             {

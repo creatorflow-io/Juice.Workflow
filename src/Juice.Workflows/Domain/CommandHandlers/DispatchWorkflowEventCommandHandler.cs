@@ -14,7 +14,7 @@ namespace Juice.Workflows.Domain.CommandHandlers
             _eventRepository = eventRepository;
         }
 
-        public async Task<IOperationResult> Handle(DispatchWorkflowEventCommand request, CancellationToken cancellationToken)
+        public async ValueTask<IOperationResult> Handle(DispatchWorkflowEventCommand request, CancellationToken cancellationToken)
         {
 
             var callbackEvent = await _eventRepository.GetAsync(request.EventRecordId, cancellationToken);

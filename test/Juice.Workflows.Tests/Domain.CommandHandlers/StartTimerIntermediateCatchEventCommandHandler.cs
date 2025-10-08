@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using Juice.Workflows.Domain.Commands;
 
-namespace Juice.Workflows.Api.Domain.CommandHandlers
+namespace Juice.Workflows.Tests.Domain.CommandHandlers
 {
     internal class StartTimerIntermediateCatchEventCommandHandler
                 : IRequestHandler<StartEventCommand<TimerIntermediateCatchEvent>, IOperationResult>
@@ -15,11 +15,11 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
             _queue = eventQueue;
         }
 
-        public async Task<IOperationResult> Handle(StartEventCommand<TimerIntermediateCatchEvent> request, CancellationToken cancellationToken)
+        public ValueTask<IOperationResult> Handle(StartEventCommand<TimerIntermediateCatchEvent> request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Handle command");
             _queue.Throw(request.Node.Record.Id);
-            return OperationResult.Success;
+            return ValueTask.FromResult(OperationResult.Success);
         }
     }
 }

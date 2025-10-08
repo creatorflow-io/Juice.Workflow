@@ -1,5 +1,4 @@
-﻿using MediatR;
-
+﻿
 namespace Juice.Workflows.Domain.Events
 {
     public class ServiceTaskRequestDomainEvent : INotification

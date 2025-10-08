@@ -1,5 +1,4 @@
 ﻿using Juice.Workflows.Domain.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Juice.Workflows.Api.Domain.EventHandlers
@@ -12,7 +11,7 @@ namespace Juice.Workflows.Api.Domain.EventHandlers
             _logger = logger;
         }
 
-        public async Task Handle(TimerEventStartDomainEvent notification, CancellationToken cancellationToken)
+        public ValueTask Handle(TimerEventStartDomainEvent notification, CancellationToken cancellationToken)
         {
             var logger = _logger.CreateLogger<TimerEventStartDomainEventHandler>();
             if (logger.IsEnabled(LogLevel.Trace))
@@ -20,6 +19,7 @@ namespace Juice.Workflows.Api.Domain.EventHandlers
                 logger.LogTrace("Timer {Name} has been sent",
                     notification.Node.DisplayName);
             }
+            return ValueTask.CompletedTask;
         }
     }
 }

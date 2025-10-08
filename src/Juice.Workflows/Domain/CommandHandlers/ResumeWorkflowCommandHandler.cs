@@ -9,7 +9,7 @@ namespace Juice.Workflows.Domain.CommandHandlers
         {
             _workflow = workflow;
         }
-        public async Task<IOperationResult<WorkflowExecutionResult>> Handle(ResumeWorkflowCommand request, CancellationToken cancellationToken)
+        public async ValueTask<IOperationResult<WorkflowExecutionResult>> Handle(ResumeWorkflowCommand request, CancellationToken cancellationToken)
         {
             return await _workflow.ResumeAsync(request.WorkflowId, request.NodeId, request.Parameters);
         }

@@ -10,7 +10,7 @@ namespace Juice.Workflows.Tests.EventHandlers
         {
             _queue = queue;
         }
-        public async Task Handle(TimerEventStartDomainEvent notification, CancellationToken cancellationToken)
+        public async ValueTask Handle(TimerEventStartDomainEvent notification, CancellationToken cancellationToken)
         {
             await Task.Delay(1000);
             _queue.Throw(notification.Node.Record.Id);

@@ -1,7 +1,6 @@
 ﻿using Juice.EventBus;
 using Juice.Timers.Api.IntegrationEvents.Events;
 using Juice.Workflows.Domain.Commands;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Juice.Workflows.Api.IntegrationEvents.Handlers

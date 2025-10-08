@@ -15,11 +15,11 @@ namespace Juice.Workflows.Tests.Domain.CommandHandlers
             _queue = eventQueue;
         }
 
-        public async Task<IOperationResult> Handle(StartTaskCommand<SendTask> request, CancellationToken cancellationToken)
+        public ValueTask<IOperationResult> Handle(StartTaskCommand<SendTask> request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Handle command");
             _queue.Throw(request.Node.Record.Id);
-            return OperationResult.Success;
+            return ValueTask.FromResult(OperationResult.Success);
         }
     }
 }

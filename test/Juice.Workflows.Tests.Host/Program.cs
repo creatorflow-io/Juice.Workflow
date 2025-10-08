@@ -1,9 +1,7 @@
-﻿using Juice.EF.Extensions;
+﻿using System.Threading.Tasks;
+using Juice.EF.Extensions;
 using Juice.EventBus;
 using Juice.EventBus.IntegrationEventLog.EF;
-using Juice.EventBus.RabbitMQ;
-using Juice.Integrations;
-using Juice.MediatR.RequestManager.Redis;
 using Juice.Services;
 using Juice.Workflows;
 using Juice.Workflows.Api;
@@ -17,7 +15,7 @@ using Juice.Workflows.Nodes.Activities;
 using Juice.Workflows.Nodes.Events;
 using Juice.Workflows.Services;
 using Juice.Workflows.Tests.Host.IntegrationEvents.Handlers;
-using MediatR;
+using Juice.MediatR;
 using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +36,7 @@ var app = builder.Build();
 
 var configuration = app.Configuration;
 
-InitEvenBusEvent(app);
+await InitEvenBusEvent(app);
 await MigrateDbAsync(app);
 
 await StartWorkflowAsync(app, workflowId);
@@ -120,7 +118,7 @@ static void ConfigureMediator(IServiceCollection services)
     services.AddMediatR(options =>
     {
         options.RegisterServicesFromAssemblyContaining<StartEvent>();
-        options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
+        options.RegisterServicesFromAssemblyContaining<WorkflowApiAssemblySelector>();
     });
     services.AddOperationExceptionBehavior();
     services.AddWorkflowStateTransactionBehavior();
@@ -132,7 +130,7 @@ static void ConfigureIntegrations(IServiceCollection services, IConfiguration co
         .AddIntegrationEventLog()
         .RegisterContext<WorkflowPersistDbContext>("Workflows");
 
-    services.RegisterRabbitMQEventBus(configuration.GetSection("RabbitMQ"),
+    services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"),
         options =>
         {
             options.BrokerName = "topic.juice_bus";
@@ -176,13 +174,13 @@ static void RegisterWorkflow(IServiceCollection services, string workflowId)
     });
 }
 
-static void InitEvenBusEvent(WebApplication app)
+static async Task InitEvenBusEvent(WebApplication app)
 {
-    var eventBus = app.Services.GetRequiredService<IEventBus>();
+    var eventBus = app.Services.GetRequiredService<IWorkflowEventBus>();
 
 
-    eventBus.Subscribe<MessageThrowIntegrationEvent, MessageThrowIntegrationEventHandler>("wfthrow.*.*");
-    eventBus.InitWorkflowIntegrationEvents();
+    await eventBus.SubscribeAsync<MessageThrowIntegrationEvent, MessageThrowIntegrationEventHandler>("wfthrow.*.*");
+    await eventBus.InitWorkflowIntegrationEventsAsync();
 }
 
 static async Task MigrateDbAsync(WebApplication app)
