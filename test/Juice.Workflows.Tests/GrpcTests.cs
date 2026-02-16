@@ -9,7 +9,7 @@ namespace Juice.Workflows.Tests
     public class GrpcTests
     {
         private ITestOutputHelper _output;
-        static string _correlationId = new DefaultStringIdGenerator().GenerateRandomId(8);
+        static string _correlationId = StringIdGenerator.Instance.GenerateRandomId(8);
         private string _definitionId = "incodeWf";
         static string _workflowId = "";
         private string _grpcEndpoint = "https://localhost:7228";

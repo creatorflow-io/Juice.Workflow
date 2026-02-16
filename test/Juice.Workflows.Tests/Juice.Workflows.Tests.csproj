@@ -5,6 +5,8 @@
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
+
+        <UserSecretsId>0fb7f655-9255-42a3-aafe-49269e3a1f3d</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -32,6 +34,9 @@
 
     <ItemGroup>
         <PackageReference Include="Juice.EventBus.RabbitMQ" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Messaging.Outbox.Migrations.PostgreSQL" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Messaging.Outbox.Migrations.SqlServer" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Messaging.Idempotency.Redis" Version="$(JuiceVersion)" />
         <PackageReference Include="Juice.XUnit" Version="$(JuiceVersion)" />
     </ItemGroup>
 

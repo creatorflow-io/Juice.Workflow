@@ -1,6 +1,6 @@
 ﻿namespace Juice.Workflows.Domain.Commands
 {
-    public class DispatchWorkflowEventCommand : IRequest<IOperationResult>
+    public record DispatchWorkflowEventCommand : MessageBase, IRequest<IOperationResult>
     {
         public Guid EventRecordId { get; init; }
         public bool IsCompleted { get; init; }

@@ -18,7 +18,7 @@
                 CurrentDirectory = AppContext.BaseDirectory
             };
             string? branch = "branch1";
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
 
             resolver.ConfigureServices(services =>
             {

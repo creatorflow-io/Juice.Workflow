@@ -32,7 +32,7 @@ namespace Juice.Workflows.Tests
                 CurrentDirectory = AppContext.BaseDirectory
             };
 
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
 
             resolver.ConfigureServices(services =>
             {
@@ -89,7 +89,7 @@ namespace Juice.Workflows.Tests
                     var workflow = executor.Executing;
                     var listeningEvents = workflow.ExecutedContext
                         .BlockingNodes.Where(b =>
-                            workflow.ExecutedContext.GetNode(b.Id).Node is IEvent);
+                            workflow.ExecutedContext.GetNode(b.Id).Node is IEventNode);
 
                     _output.WriteLine("Waiting for events: " + JsonConvert.SerializeObject(listeningEvents));
 

@@ -1,7 +1,5 @@
 ﻿using Juice.EF.Extensions;
-using Juice.EventBus.RabbitMQ;
 using Juice.Workflows.Api;
-using Juice.Workflows.Api.Domain.CommandHandlers;
 using Juice.Workflows.Bpmn;
 using Juice.Workflows.Domain.AggregatesModel.DefinitionAggregate;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
@@ -10,7 +8,7 @@ using Juice.Workflows.EF;
 using Juice.Workflows.Extensions;
 using Juice.XUnit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace Juice.Workflows.Tests
 {
@@ -34,7 +32,7 @@ namespace Juice.Workflows.Tests
             {
                 CurrentDirectory = AppContext.BaseDirectory
             };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             resolver.ConfigureServices(services =>
             {
                 var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
@@ -83,7 +81,7 @@ namespace Juice.Workflows.Tests
             {
                 CurrentDirectory = AppContext.BaseDirectory
             };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             resolver.ConfigureServices(services =>
             {
                 var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
@@ -117,7 +115,7 @@ namespace Juice.Workflows.Tests
                 {
                     options.RegisterServicesFromAssemblyContaining<StartEvent>();
                     options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
-                    options.RegisterServicesFromAssemblyContaining<WorkflowApiAssemblySelector>();
+                    options.AddWorkflowApiServices();
                 });
 
             });
@@ -179,27 +177,23 @@ namespace Juice.Workflows.Tests
 
                 services.RegisterNodes(typeof(OutcomeBranchUserTask));
 
-                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
-                {
-                    options.BrokerName = "workflow_exchange";
-                    options.SubscriptionClientName = "juice_wf_xunit_2";
-                });
-
                 services.RegisterDbWorkflows();
 
                 services.AddMediatR(options =>
                 {
                     options.RegisterServicesFromAssemblyContaining<StartEvent>();
                     options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
-                    options.RegisterServicesFromAssemblyContaining<WorkflowApiAssemblySelector>();
+                    options.AddWorkflowApiServices();
                 });
 
-                services.RegisterRabbitMQEventBus(configuration.GetSection("RabbitMQ"),
-                    options =>
-                    {
-                        options.BrokerName = "direct.juice_bus";
-                        options.SubscriptionClientName = "direct_wf";
-                    });
+                services
+                   .AddMessaging()
+                   .AddIdempotencyRedis(redis =>
+                   {
+                       redis.ConnectionString = configuration.GetConnectionString("Redis");
+                   })
+                   .AddWorkflowOutbox()
+                   .AddPublishingPolicies(configuration.GetSection("EventBus:PublishingPolicies"));
 
                 services.AddSingleton<EventQueue>();
 
@@ -281,20 +275,8 @@ namespace Juice.Workflows.Tests
                 {
                     options.RegisterServicesFromAssemblyContaining<StartEvent>();
                     options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
-                    options.RegisterServicesFromAssemblyContaining<WorkflowApiAssemblySelector>();
+                    options.AddWorkflowApiServices();
                 });
-
-                services.RegisterRabbitMQEventBus(configuration.GetSection("RabbitMQ"),
-                    options =>
-                    {
-                        options.BrokerName = "direct.juice_bus";
-                        options.SubscriptionClientName = "direct_wf";
-                    });
-
-                //services.AddIntegrationEventService()
-                //    .AddIntegrationEventLog()
-                //    .RegisterContext<WorkflowPersistDbContext>()
-                //;
 
                 services.AddSingleton<EventQueue>();
 

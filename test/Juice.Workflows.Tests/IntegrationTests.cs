@@ -1,7 +1,8 @@
 ﻿using Juice.EventBus;
-using Juice.EventBus.RabbitMQ;
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
+using Juice.Workflows.EF;
 using Juice.XUnit;
+using Microsoft.Extensions.Configuration;
 
 namespace Juice.Workflows.Tests
 {
@@ -14,20 +15,13 @@ namespace Juice.Workflows.Tests
             _output = output;
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
         }
-
-        [IgnoreOnCIFact(DisplayName = "Send topic event"), TestPriority(800)]
-        public async Task Send_topic_event_Async()
+        private DependencyResolver CreateResolver(Action<IServiceCollection, IConfiguration> configure)
         {
-            _output.WriteLine("THIS TEST RUN WITH Juice.Workflows.Tests.Host TOGETHER");
-            var resolver = new DependencyResolver
+            var resolver = DependencyResolver.Create((services, configuration) =>
             {
-                CurrentDirectory = AppContext.BaseDirectory
-            };
+                services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-            resolver.ConfigureServices(services =>
-            {
-                var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
-                var configuration = configService.GetConfiguration();
+                services.AddDefaultStringIdGenerator();
 
                 services.AddSingleton(provider => _output);
 
@@ -38,21 +32,59 @@ namespace Juice.Workflows.Tests
                     .AddConfiguration(configuration.GetSection("Logging"));
                 });
 
-                services.RegisterRabbitMQEventBus(configuration.GetSection("RabbitMQ"),
-                    options =>
-                    {
-                        options.BrokerName = "topic.juice_bus";
-                        options.SubscriptionClientName = "juice_wf_test_events";
-                        options.ExchangeType = "topic";
-                    });
+                services.AddWorkflowServices()
+                    .AddInMemoryReposistories();
+                services.RegisterNodes(typeof(OutcomeBranchUserTask));
 
+                services.AddMediatR(options =>
+                {
+                    options.RegisterServicesFromAssemblyContaining<StartEvent>();
+                    options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
+                    options.AddIdempotencyRequestBehavior();
+                    options.AddWorkflowApiServices();
+                });
+
+
+                services
+                    .AddMessaging()
+                    .AddIdempotencyRedis(redis =>
+                    {
+                        redis.ConnectionString = configuration.GetConnectionString("Redis");
+                    })
+                    .AddOutbox()
+                    .AddPublishingPolicies(configuration.GetSection("EventBus:PublishingPolicies"))
+                    .AddEventBus()
+                        .AddRabbitMQ(cfg =>
+                        {
+                            cfg.AddConnection(name: "rabbitmq", configuration.GetSection("EventBus:Connections:RabbitMQ"))
+                                .AddProducer("rabbitmq", "rabbitmq");
+                            ;
+                        });
+
+
+                services.AddSingleton<EventQueue>();
+
+                configure(services, configuration);
+
+            }, default);
+            return resolver;
+        }
+        [IgnoreOnCIFact(DisplayName = "Send topic event"), TestPriority(800)]
+        [InitializeMessageContext]
+        public async Task Send_topic_event_Async()
+        {
+            _output.WriteLine("THIS TEST RUN WITH Juice.Workflows.Tests.Host TOGETHER");
+            var resolver = CreateResolver((services, configuration) =>
+            {
+                services.AddMessaging()
+                    .AddEventBus().AddPublishingServices();
             });
 
             using var scope = resolver.ServiceProvider.CreateScope();
             var eventBus = scope.ServiceProvider.GetRequiredService<IEventBus>();
 
             await eventBus.PublishAsync(new MessageCatchIntegrationEvent("wfcatch.uploaded.media.final", default, "89czp0dd01r4b72zr19fc61jkr",
-                true, new System.Collections.Generic.Dictionary<string, object?> { { "Transfered", "Success" } }));
+                true, new System.Collections.Generic.Dictionary<string, object?> { { "Transfered", "Success" } }), "Workflows");
 
             await Task.Delay(TimeSpan.FromSeconds(1));
         }

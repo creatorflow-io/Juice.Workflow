@@ -5,7 +5,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
 {
     public class StartServiceTaskCommandHandler : StartTaskCommandHandlerBase<ServiceTask>
     {
-        public StartServiceTaskCommandHandler(IWorkflowEventBus eventBus, IEventRepository eventRepository) : base(eventBus, eventRepository)
+        public StartServiceTaskCommandHandler(IWorkflowOutboxService outbox, IEventRepository eventRepository) : base(outbox, eventRepository)
         {
 
         }

@@ -92,7 +92,7 @@ namespace Juice.Workflows.Builder
         {
             var node = _nodeLibrary.CreateInstance(type, _serviceProvider);
             var nodeId = node is IGateway ? NewGatewayId()
-            : node is IEvent ? NewEventId()
+            : node is IEventNode ? NewEventId()
             : NewActivityId();
             var record = new NodeRecord { Id = nodeId, Name = name ?? node.DisplayText, ProcessIdRef = processId };
             return (node, record);

@@ -2,7 +2,7 @@
 
 namespace Juice.Workflows.Domain.Commands
 {
-    public class StartTaskCommand<TTask> : INodeCommand, IRequest<IOperationResult>
+    public record StartTaskCommand<TTask> : MessageBase, INodeCommand, IRequest<IOperationResult>
         where TTask : Activity
     {
         public string WorkflowId { get; init; }

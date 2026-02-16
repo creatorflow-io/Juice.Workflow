@@ -5,9 +5,9 @@ using Juice.Workflows.Nodes.Activities;
 
 namespace Juice.Workflows.Api.Domain.CommandHandlers
 {
-    public class StartSendTaskCommandHandler : StartTaskCommandHandlerBase<SendTask>
+    public class StartSendTaskCommandHandler: StartTaskCommandHandlerBase<SendTask>
     {
-        public StartSendTaskCommandHandler(IWorkflowEventBus eventBus, IEventRepository eventRepository) : base(eventBus, eventRepository)
+        public StartSendTaskCommandHandler(IWorkflowOutboxService outbox, IEventRepository eventRepository) : base(outbox, eventRepository)
         {
 
         }
@@ -27,7 +27,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
 
                 var @event = new MessageThrowIntegrationEvent(GetThrowEventKey(request), callbackEvent.Id, request.CorrelationId, properties);
 
-                await _eventBus.PublishAsync(@event);
+                await _outbox.AddEventAsync(@event);
 
                 callbackEvent.Complete();
                 await _eventRepository.UpdateAsync(callbackEvent, cancellationToken);

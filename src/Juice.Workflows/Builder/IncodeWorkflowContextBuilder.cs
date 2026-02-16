@@ -75,7 +75,7 @@ namespace Juice.Workflows.Builder
             var currentId = _currentNodeId;
 
             var id = typeof(T).IsAssignableTo(typeof(IGateway)) ? NewGatewayId()
-                : typeof(T).IsAssignableTo(typeof(IEvent)) ? NewEventId()
+                : typeof(T).IsAssignableTo(typeof(IEventNode)) ? NewEventId()
                 : NewActivityId();
             var flowId = NewFlowId();
 

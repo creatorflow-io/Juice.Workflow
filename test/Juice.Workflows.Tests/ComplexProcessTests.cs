@@ -1,9 +1,13 @@
-﻿using Juice.Workflows.Api;
+﻿using Juice.Timers.Api.IntegrationEvents.Events;
 using Juice.Workflows.Api.Domain.CommandHandlers;
 using Juice.Workflows.Bpmn;
 using Juice.Workflows.Domain.AggregatesModel.DefinitionAggregate;
+using Juice.Workflows.EF;
 using Juice.Workflows.Extensions;
 using Juice.Workflows.Yaml;
+using Juice.XUnit;
+using Microsoft.Extensions.Configuration;
+using RabbitMQ.Client;
 
 namespace Juice.Workflows.Tests
 {
@@ -16,36 +20,92 @@ namespace Juice.Workflows.Tests
             _output = output;
             Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
         }
-
-        /*
-         * Should print workflow visualization
-         * 
-         *                | P-KB           ---------------          ---------------              |         ---------------
-( )----0----><+>----1---->|   ( )----3---->|      KB      |---4---->|  Approve KB  |---8---->()) |--16---->| Approve Grph |--17----><+>---18---->())
-              |           |_               ---------------          ---------------           __ |         ---------------           ^
-              |           ---------------                       ---------------          ---------------                       ------|'-------
-              '-----2---->|    Editing   |---5----><+>----6---->|      WEB     |---9---->|  Approve Vid |--11----><+>---12---->|    Copy PS   |
-                          ---------------           |           ---------------          ---------------           |           ------'--------
-                                                    |           ---------------                                    |           -------'-------
-                                                    '-----7---->|    Social    |----------------10-----------------'----13---->|    Publish   |
-                                                                ---------------                                                ---------------
-
-         */
-
-        [Fact(DisplayName = "Should select all branches")]
-
-        public async Task Should_select_all_paths_Async()
+        #region Init
+        [IgnoreOnCIFact(DisplayName = "Init infra"), TestPriority(999)]
+        public async Task InitInfraAsync()
         {
             var resolver = new DependencyResolver
             {
                 CurrentDirectory = AppContext.BaseDirectory
             };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
             resolver.ConfigureServices(services =>
             {
                 var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
-                var configuration = configService.GetConfiguration();
+                var configuration = configService.GetConfiguration(GetType().Assembly);
+                services.AddSingleton(_output);
+                services.AddLogging(builder =>
+                {
+                    builder.ClearProviders()
+                    .AddTestOutputLogger()
+                    .AddConfiguration(configuration.GetSection("Logging"));
+                });
 
+                services.AddEventBus()
+                    .AddRabbitMQ(cfg =>
+                    {
+                        cfg.AddConnection(name: "rabbitmq", configuration.GetSection("EventBus:Connections:RabbitMQ"))
+                            .AddInfrastructureTopology("rabbitmq", icfg =>
+                            {
+                                icfg.DeclareExchange("x.workflow.integration", ExchangeType.Topic)
+                                    .DeclareQueue("x_workflow_queue")
+                                    .BindQueue("x_workflow_queue", "x.workflow.integration", "wfthrow.#")
+                                    .BindQueue("x_workflow_queue", "x.workflow.integration", "wfcatch.#")
+                                    .DeclareQueue("testhost_workflow_queue")
+                                    .BindQueue("testhost_workflow_queue", "x.workflow.integration", "wfthrow.#")
+                                    .BindQueue("testhost_workflow_queue", "x.workflow.integration", "wfcatch.#")
+                                    .BindQueue("testhost_workflow_queue", "x.timer.integration", "timer.expired.workflow")
+                                    ;
+
+                            });
+                    });
+            });
+            var serviceProvider = resolver.ServiceProvider;
+            await serviceProvider.InitRabbitMQInfrastructureAsync();
+        }
+
+        [IgnoreOnCITheory(DisplayName = "Migrate Outbox"), TestPriority(999)]
+        [InlineData("SqlServer")]
+        [InlineData("PostgreSQL")]
+        public async Task MigrateOutboxAsync(string provider)
+        {
+            var resolver = new DependencyResolver
+            {
+                CurrentDirectory = AppContext.BaseDirectory
+            };
+            resolver.ConfigureServices(services =>
+            {
+                var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
+                var configuration = configService.GetConfiguration(GetType().Assembly);
+                services.AddSingleton(_output);
+                services.AddLogging(builder =>
+                {
+                    builder.ClearProviders()
+                    .AddTestOutputLogger()
+                    .AddConfiguration(configuration.GetSection("Logging"));
+                });
+
+                services.AddOutboxMigrations<WorkflowDbContext>(configuration, options => {
+                    options.DatabaseProvider = provider;
+                    options.ConnectionName = provider switch
+                    {
+                        "SqlServer" => "SqlServerConnection",
+                        "PostgreSQL" => "PostgreConnection",
+                        _ => throw new NotSupportedException($"Unsupported provider: {provider}")
+                    };
+                    options.Schema = "Workflows";
+                });
+            });
+            var serviceProvider = resolver.ServiceProvider;
+            await serviceProvider.MigrateOutboxAsync<WorkflowDbContext>();
+        }
+
+
+        #endregion
+
+        private DependencyResolver CreateResolver(Action<IServiceCollection, IConfiguration> configure)
+        {
+            var resolver = DependencyResolver.Create((services, configuration) =>
+            {
                 services.AddLocalization(options => options.ResourcesPath = "Resources");
 
                 services.AddDefaultStringIdGenerator();
@@ -67,16 +127,48 @@ namespace Juice.Workflows.Tests
                 {
                     options.RegisterServicesFromAssemblyContaining<StartEvent>();
                     options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
+                    options.AddIdempotencyRequestBehavior();
                 });
 
-                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
-                {
-                    options.BrokerName = "workflow_exchange";
-                    options.SubscriptionClientName = "juice_wf_xunit_1";
-                });
+                services
+                    .AddMessaging()
+                    .AddIdempotencyRedis(redis =>
+                    {
+                        redis.ConnectionString = configuration.GetConnectionString("Redis");
+                    })
+                    .AddWorkflowOutbox()
+                    .AddPublishingPolicies(configuration.GetSection("EventBus:PublishingPolicies"));
 
                 services.AddSingleton<EventQueue>();
 
+                configure(services, configuration);
+
+            }, default);
+            return resolver;
+        }
+
+        /*
+         * Should print workflow visualization
+         * 
+         *                | P-KB           ---------------          ---------------              |         ---------------
+( )----0----><+>----1---->|   ( )----3---->|      KB      |---4---->|  Approve KB  |---8---->()) |--16---->| Approve Grph |--17----><+>---18---->())
+              |           |_               ---------------          ---------------           __ |         ---------------           ^
+              |           ---------------                       ---------------          ---------------                       ------|'-------
+              '-----2---->|    Editing   |---5----><+>----6---->|      WEB     |---9---->|  Approve Vid |--11----><+>---12---->|    Copy PS   |
+                          ---------------           |           ---------------          ---------------           |           ------'--------
+                                                    |           ---------------                                    |           -------'-------
+                                                    '-----7---->|    Social    |----------------10-----------------'----13---->|    Publish   |
+                                                                ---------------                                                ---------------
+
+         */
+
+        [Fact(DisplayName = "Should select all branches")]
+        public async Task Should_select_all_paths_Async()
+        {
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
+
+            var resolver = CreateResolver((services, configuration) =>
+            {
                 services.RegisterWorkflow(workflowId, builder =>
                 {
                     builder
@@ -97,59 +189,22 @@ namespace Juice.Workflows.Tests
                         .End()
                         ;
                 });
-
             });
 
             var result = await WorkflowTestHelper.ExecuteAsync(resolver.ServiceProvider, _output, workflowId);
 
             result.Should().NotBeNull();
             _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
-
         }
 
         [Fact(DisplayName = "Should not timeout")]
-
         public async Task Should_not_timeout_Async()
         {
-            var resolver = new DependencyResolver
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
+
+            var resolver = CreateResolver((services, configuration) =>
             {
-                CurrentDirectory = AppContext.BaseDirectory
-            };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
-            resolver.ConfigureServices(services =>
-            {
-                var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
-                var configuration = configService.GetConfiguration();
-
-                services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-                services.AddDefaultStringIdGenerator();
-
-                services.AddSingleton(provider => _output);
-
-                services.AddLogging(builder =>
-                {
-                    builder.ClearProviders()
-                    .AddTestOutputLogger()
-                    .AddConfiguration(configuration.GetSection("Logging"));
-                });
-
-                services.AddMediatR(options =>
-                {
-                    options.RegisterServicesFromAssemblyContaining<StartEvent>();
-                    options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
-                });
-                services.AddSingleton<EventQueue>();
-
-                services.AddWorkflowServices()
-                    .AddInMemoryReposistories();
                 services.RegisterNodes(typeof(FailureTask));
-
-                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
-                {
-                    options.BrokerName = "workflow_exchange";
-                    options.SubscriptionClientName = "juice_wf_xunit_2";
-                });
 
                 services.RegisterWorkflow(workflowId, builder =>
                 {
@@ -181,55 +236,17 @@ namespace Juice.Workflows.Tests
 
             result.Should().NotBeNull();
             _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
-
             result.Status.Should().Be(WorkflowStatus.Finished);
-
         }
 
-
         [Fact(DisplayName = "Should timeout terminate")]
-
         public async Task Should_timeout_Async()
         {
-            var resolver = new DependencyResolver
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
+
+            var resolver = CreateResolver((services, configuration) =>
             {
-                CurrentDirectory = AppContext.BaseDirectory
-            };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
-            resolver.ConfigureServices(services =>
-            {
-                var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
-                var configuration = configService.GetConfiguration();
-
-                services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-                services.AddDefaultStringIdGenerator();
-
-                services.AddSingleton(provider => _output);
-
-                services.AddLogging(builder =>
-                {
-                    builder.ClearProviders()
-                    .AddTestOutputLogger()
-                    .AddConfiguration(configuration.GetSection("Logging"));
-                });
-
-                services.AddMediatR(options =>
-                {
-                    options.RegisterServicesFromAssemblyContaining<StartEvent>();
-                    options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
-                });
-                services.AddSingleton<EventQueue>();
-
-                services.AddWorkflowServices()
-                    .AddInMemoryReposistories();
                 services.RegisterNodes(typeof(FailureTask));
-
-                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
-                {
-                    options.BrokerName = "workflow_exchange";
-                    options.SubscriptionClientName = "juice_wf_xunit_3";
-                });
 
                 services.RegisterWorkflow(workflowId, builder =>
                 {
@@ -239,7 +256,7 @@ namespace Juice.Workflows.Tests
                             .Fork().SubProcess("P-KB", subBuilder =>
                             {
                                 subBuilder.Start().Then<UserTask>("KB").Then<ServiceTask>("Convert KB").End();
-                            }, default).Then<UserTask>("Approve Grph")
+                            }, default, default).Then<UserTask>("Approve Grph")
                             .Seek("P-KB").Attach<BoundaryTimerEvent>("Error").Then<SendTask>("Author inform").Terminate()
                             .Seek("p1")
                             .Fork().Then<UserTask>("Editing")
@@ -260,55 +277,21 @@ namespace Juice.Workflows.Tests
 
             result.Should().NotBeNull();
             _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
-
             result.Status.Should().Be(WorkflowStatus.Aborted);
-
         }
 
-
         [Fact(DisplayName = "Should failure terminate")]
-
         public async Task Should_terminate_Async()
         {
-            var resolver = new DependencyResolver
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
+
+            var resolver = CreateResolver((services, configuration) =>
             {
-                CurrentDirectory = AppContext.BaseDirectory
-            };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
-            resolver.ConfigureServices(services =>
-            {
-                var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
-                var configuration = configService.GetConfiguration();
-
-                services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-                services.AddDefaultStringIdGenerator();
-
-                services.AddSingleton(provider => _output);
-
-                services.AddLogging(builder =>
-                {
-                    builder.ClearProviders()
-                    .AddTestOutputLogger()
-                    .AddConfiguration(configuration.GetSection("Logging"));
-                });
-
                 services.AddMediatR(options =>
                 {
-                    options.RegisterServicesFromAssemblyContaining<StartEvent>();
-                    options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
                     options.RegisterServicesFromAssemblyContaining<StartBoundaryTimerEventCommandHandler>();
                 });
-                services.AddSingleton<EventQueue>();
 
-                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
-                {
-                    options.BrokerName = "workflow_exchange";
-                    options.SubscriptionClientName = "juice_wf_xunit_4";
-                });
-
-                services.AddWorkflowServices()
-                    .AddInMemoryReposistories();
                 services.RegisterNodes(typeof(FailureTask));
 
                 services.RegisterWorkflow(workflowId, builder =>
@@ -319,7 +302,7 @@ namespace Juice.Workflows.Tests
                             .Fork().SubProcess("P-KB", subBuilder =>
                             {
                                 subBuilder.Start().Then<UserTask>("KB").Then<ServiceTask>("Convert KB").End();
-                            }, default).Then<UserTask>("Approve Grph")
+                            }, default, default).Then<UserTask>("Approve Grph")
                             .Seek("P-KB").Attach<BoundaryErrorEvent>("Error").Then<SendTask>("Author inform").Terminate()
                             .Seek("p1")
                             .Fork().Then<UserTask>("Editing")
@@ -340,59 +323,20 @@ namespace Juice.Workflows.Tests
 
             result.Should().NotBeNull();
             _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
-
             result.Status.Should().Be(WorkflowStatus.Aborted);
-
         }
 
-
         [Fact(DisplayName = "Yaml failure terminate")]
-
         public async Task Yaml_should_terminate_Async()
         {
-            var resolver = new DependencyResolver
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
+
+            var resolver = CreateResolver((services, configuration) =>
             {
-                CurrentDirectory = AppContext.BaseDirectory
-            };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
-            resolver.ConfigureServices(services =>
-            {
-                var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
-                var configuration = configService.GetConfiguration();
-
-                services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-                services.AddDefaultStringIdGenerator();
-
-                services.AddSingleton(provider => _output);
-
-                services.AddLogging(builder =>
-                {
-                    builder.ClearProviders()
-                    .AddTestOutputLogger()
-                    .AddConfiguration(configuration.GetSection("Logging"));
-                });
-
-                services.AddMediatR(options =>
-                {
-                    options.RegisterServicesFromAssemblyContaining<StartEvent>();
-                    options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
-                });
-                services.AddSingleton<EventQueue>();
-
-                services.AddWorkflowServices()
-                    .AddInMemoryReposistories();
                 services.RegisterNodes(typeof(FailureTask));
-
-                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
-                {
-                    options.BrokerName = "workflow_exchange";
-                    options.SubscriptionClientName = "juice_wf_xunit_5";
-                });
-
                 services.RegisterYamlWorkflows();
 
-                services.RegisterWorkflow("incodewf", builder =>
+                services.RegisterWorkflow(workflowId, builder =>
                 {
                     builder
                         .Start()
@@ -421,113 +365,53 @@ namespace Juice.Workflows.Tests
 
             result.Should().NotBeNull();
             _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
-
             result.Status.Should().Be(WorkflowStatus.Aborted);
-
         }
 
         [Fact(DisplayName = "Bpmn should add to db")]
-
         public async Task Bpmn_should_terminate_Async()
         {
-            var resolver = new DependencyResolver
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
+
+            var resolver = CreateResolver((services, configuration) =>
             {
-                CurrentDirectory = AppContext.BaseDirectory
-            };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
-            resolver.ConfigureServices(services =>
-            {
-                var configService = services.BuildServiceProvider().GetRequiredService<IConfigurationService>();
-                var configuration = configService.GetConfiguration();
-
-                services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-                services.AddDefaultStringIdGenerator();
-
-                services.AddSingleton(provider => _output);
-
-                services.AddLogging(builder =>
-                {
-                    builder.ClearProviders()
-                    .AddTestOutputLogger()
-                    .AddConfiguration(configuration.GetSection("Logging"));
-                });
-
-                services.AddMediatR(options =>
-                {
-                    options.RegisterServicesFromAssemblyContaining<StartEvent>();
-                    options.RegisterServicesFromAssemblyContaining<TimerEventStartDomainEventHandler>();
-                });
-                services.AddSingleton<EventQueue>();
-
                 services.AddWorkflowServices()
                     .RegisterDbWorkflows()
                     .AddInMemoryReposistories();
 
-                services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"), options =>
-                {
-                    options.BrokerName = "workflow_exchange";
-                    options.SubscriptionClientName = "juice_wf_xunit_6";
-                });
-
                 services.RegisterNodes(typeof(FailureTask));
-
                 services.RegisterBpmnWorkflows();
             });
 
             var definitionRepo = resolver.ServiceProvider.GetRequiredService<IDefinitionRepository>();
 
             {
-                WorkflowExecutionResult? result = default;
-                try
-                {
-                    result = await WorkflowTestHelper.ExecuteAsync(resolver.ServiceProvider, _output, "diagram",
-                        new System.Collections.Generic.Dictionary<string, object?> { { "TaskStatus", WorkflowStatus.Faulted } });
+                var result = await WorkflowTestHelper.ExecuteAsync(resolver.ServiceProvider, _output, "diagram",
+                    new System.Collections.Generic.Dictionary<string, object?> { { "TaskStatus", WorkflowStatus.Faulted } });
 
-                    result.Should().NotBeNull();
+                result.Should().NotBeNull();
+                _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
+                result.Status.Should().Be(WorkflowStatus.Aborted);
 
-                    result.Status.Should().Be(WorkflowStatus.Aborted);
+                var context = result.Context;
+                context.ResolvedBy.Should().Be(typeof(Bpmn.Builder.WorkflowContextBuilder).FullName);
 
-                    var context = result.Context;
-                    context.ResolvedBy.Should().Be(typeof(Bpmn.Builder.WorkflowContextBuilder).FullName);
-
-                    var createResult = await definitionRepo.SaveWorkflowContextAsync(context, "diagram", context.Name!, true, default);
-                    _output.WriteLine(createResult.ToString());
-                    createResult.Succeeded.Should().BeTrue();
-
-                }
-                finally
-                {
-                    if (result != null)
-                    {
-                        _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
-                    }
-                }
+                var createResult = await definitionRepo.SaveWorkflowContextAsync(context, "diagram", context.Name!, true, default);
+                _output.WriteLine(createResult.ToString());
+                createResult.Succeeded.Should().BeTrue();
             }
+
             {
-                WorkflowExecutionResult? result = default;
-                try
-                {
-                    result = await WorkflowTestHelper.ExecuteAsync(resolver.ServiceProvider, _output, "diagram",
-                        new System.Collections.Generic.Dictionary<string, object?> { { "TaskStatus", WorkflowStatus.Faulted } });
+                var result = await WorkflowTestHelper.ExecuteAsync(resolver.ServiceProvider, _output, "diagram",
+                    new System.Collections.Generic.Dictionary<string, object?> { { "TaskStatus", WorkflowStatus.Faulted } });
 
-                    result.Should().NotBeNull();
+                result.Should().NotBeNull();
+                _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
+                result.Status.Should().Be(WorkflowStatus.Aborted);
 
-                    result.Status.Should().Be(WorkflowStatus.Aborted);
-
-                    var context = result.Context;
-                    context.ResolvedBy.Should().Be(typeof(Builder.DbWorkflowContextBuilder).FullName);
-
-                }
-                finally
-                {
-                    if (result != null)
-                    {
-                        _output.WriteLine(ContextPrintHelper.Visualize(result.Context));
-                    }
-                }
+                var context = result.Context;
+                context.ResolvedBy.Should().Be(typeof(Builder.DbWorkflowContextBuilder).FullName);
             }
         }
-
     }
 }

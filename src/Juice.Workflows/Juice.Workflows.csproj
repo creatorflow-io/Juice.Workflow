@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Juice" Version="$(JuiceVersion)" />
         <PackageReference Include="Juice.MediatR" Version="$(JuiceVersion)" />
         <PackageReference Include="Juice.EventBus" Version="$(JuiceVersion)" />
     </ItemGroup>

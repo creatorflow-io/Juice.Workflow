@@ -1,7 +1,7 @@
 ﻿
 namespace Juice.Workflows.Domain.Events
 {
-    public class ProcessStartedDomainEvent : INotification
+    public record ProcessStartedDomainEvent : MessageBase, INotification
     {
         public NodeContext Node { get; init; }
         public ProcessStartedDomainEvent(NodeContext node)

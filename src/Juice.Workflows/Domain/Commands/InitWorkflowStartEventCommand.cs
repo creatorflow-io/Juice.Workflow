@@ -1,6 +1,6 @@
 ﻿namespace Juice.Workflows.Domain.Commands
 {
-    public class InitWorkflowStartEventCommand : IRequest<IOperationResult>
+    public record InitWorkflowStartEventCommand : MessageBase, IRequest<IOperationResult>
     {
         public string WorkflowId { get; init; }
         public NodeRecord[] StartNodes { get; init; }

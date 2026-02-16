@@ -39,7 +39,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
 
         protected virtual string? GetCatchEventKey(TRequest request)
         {
-            var eventName = request.Node.Properties.GetOption<string?>("CatchEvent");
+            var eventName = request.Node.Properties.GetOption<string?>("CatchEvent") ?? request.Node.Node.GetType().Name.ToLower();
 
             return !string.IsNullOrEmpty(eventName) ? $"wfcatch.{eventName}" : default;
         }

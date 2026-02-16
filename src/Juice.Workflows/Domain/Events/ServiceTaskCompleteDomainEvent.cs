@@ -1,7 +1,7 @@
 ﻿
 namespace Juice.Workflows.Domain.Events
 {
-    public class ServiceTaskCompleteDomainEvent : INotification
+    public record class ServiceTaskCompleteDomainEvent : MessageBase, INotification
     {
         public NodeContext Node { get; init; }
 

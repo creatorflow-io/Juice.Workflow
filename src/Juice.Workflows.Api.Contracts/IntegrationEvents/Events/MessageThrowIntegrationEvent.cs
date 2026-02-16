@@ -6,6 +6,6 @@ namespace Juice.Workflows.Api.Contracts.IntegrationEvents.Events
         string? CorrelationId, Dictionary<string, object?> Properties)
         : IntegrationEvent
     {
-        public override string GetEventKey() => Key;
+        public override string EventName => Key;
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-
 namespace Juice.Workflows.Nodes
 {
     public abstract class Activity : Node, IActivity
@@ -36,7 +35,7 @@ namespace Juice.Workflows.Nodes
 
     }
 
-    public abstract class Event : Node, IEvent
+    public abstract class Event : Node, IEventNode
     {
         protected Event(IStringLocalizerFactory stringLocalizer) : base(stringLocalizer)
         {

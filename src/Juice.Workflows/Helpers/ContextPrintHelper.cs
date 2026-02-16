@@ -55,7 +55,7 @@ namespace Juice.Workflows.Helpers
                 padWidth = 2;
                 currentPoint += 3;
             }
-            else if (node.Node is IEvent)
+            else if (node.Node is IEventNode)
             {
                 PrintEvent(node, midRow, col);
                 padWidth = 2;
@@ -185,7 +185,7 @@ namespace Juice.Workflows.Helpers
             {
                 if (mergeLocation.Row < row)
                 {
-                    var startRow = mergeType is IGateway || mergeType is IEvent
+                    var startRow = mergeType is IGateway || mergeType is IEventNode
                         ? mergeLocation.Row + 1 : mergeLocation.Row + 2;
                     Row(startRow).Replace(' ', '^', mergePoint, 1).Replace('|', '^', mergePoint, 1);
 
@@ -202,7 +202,7 @@ namespace Juice.Workflows.Helpers
                 }
                 else
                 {
-                    var startRow = mergeType is IGateway || mergeType is IEvent
+                    var startRow = mergeType is IGateway || mergeType is IEventNode
                         ? mergeLocation.Row - 1 : mergeLocation.Row - 2;
                     Row(startRow).Replace(' ', 'v', mergePoint, 1).Replace('|', '^', mergePoint, 1);
                     Row(row).Replace(' ', '.', mergePoint, 1).Replace('|', '.', mergePoint, 1);
@@ -220,7 +220,7 @@ namespace Juice.Workflows.Helpers
             }
             else
             {
-                var startRow = mergeType is IGateway || mergeType is IEvent
+                var startRow = mergeType is IGateway || mergeType is IEventNode
                         ? mergeLocation.Row + 1 : mergeLocation.Row + 2;
                 if (mergeLocation.Row < row)
                 {

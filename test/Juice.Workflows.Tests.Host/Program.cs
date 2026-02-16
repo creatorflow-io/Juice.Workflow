@@ -1,12 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Juice.EF.Extensions;
-using Juice.EventBus;
-using Juice.EventBus.IntegrationEventLog.EF;
 using Juice.Services;
 using Juice.Workflows;
 using Juice.Workflows.Api;
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
-using Juice.Workflows.Api.Domain.EventHandlers;
 using Juice.Workflows.Domain.AggregatesModel.WorkflowStateAggregate;
 using Juice.Workflows.Domain.Commands;
 using Juice.Workflows.EF;
@@ -17,6 +14,7 @@ using Juice.Workflows.Services;
 using Juice.Workflows.Tests.Host.IntegrationEvents.Handlers;
 using Juice.MediatR;
 using Newtonsoft.Json;
+using Juice.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +34,6 @@ var app = builder.Build();
 
 var configuration = app.Configuration;
 
-await InitEvenBusEvent(app);
 await MigrateDbAsync(app);
 
 await StartWorkflowAsync(app, workflowId);
@@ -107,10 +104,6 @@ static void ConfigureWorkflow(IServiceCollection services, IConfiguration config
 
     services.RegisterDbWorkflows();
 
-    services.AddWorkflowIntegrationEventHandlers();
-
-    services.AddTransient<MessageThrowIntegrationEventHandler>();
-
 }
 
 static void ConfigureMediator(IServiceCollection services)
@@ -118,30 +111,38 @@ static void ConfigureMediator(IServiceCollection services)
     services.AddMediatR(options =>
     {
         options.RegisterServicesFromAssemblyContaining<StartEvent>();
-        options.RegisterServicesFromAssemblyContaining<WorkflowApiAssemblySelector>();
+        options.AddIdempotencyRequestBehavior();
+        options.AddWorkflowApiServices();
     });
-    services.AddOperationExceptionBehavior();
-    services.AddWorkflowStateTransactionBehavior();
 }
 
 static void ConfigureIntegrations(IServiceCollection services, IConfiguration configuration, string provider = "PostgreSQL")
 {
-    services.AddIntegrationEventService()
-        .AddIntegrationEventLog()
-        .RegisterContext<WorkflowPersistDbContext>("Workflows");
-
-    services.RegisterRabbitMQEventBus<IWorkflowEventBus>(configuration.GetSection("RabbitMQ"),
-        options =>
-        {
-            options.BrokerName = "topic.juice_bus";
-            options.SubscriptionClientName = "juice_wf_test_host_events";
-            options.ExchangeType = "topic";
-        });
-
-    services.AddRedisMediatorRequestManager(options =>
-    {
-        options.UseDirectConnect(configuration.GetConnectionString("Redis"));
-    });
+    services
+            .AddMessaging()
+            .AddIdempotencyRedis(redis =>
+            {
+                redis.ConnectionString = configuration.GetConnectionString("Redis");
+            })
+            .AddWorkflowOutbox()
+            .AddPublishingPolicies(configuration.GetSection("EventBus:PublishingPolicies"))
+            .AddDelivery(delivery =>
+            {
+                delivery.AddDeliveryPolicies(configuration.GetSection("EventBus:DeliveryPolicies"));
+                delivery.AddWorkflowDelivery("rabbitmq");
+            })
+            .AddEventBus()
+                .SubscribeWorkflowIntegrationEvents()
+                .AddRabbitMQ(cfg =>
+                {
+                    cfg.AddConnection(name: "rabbitmq", configuration.GetSection("EventBus:Connections:RabbitMQ"))
+                        .AddProducer("rabbitmq", "rabbitmq")
+                        .AddConsumer("testhost_consumer", "testhost_workflow_queue", "rabbitmq", ccfg =>
+                        {
+                            ccfg.Subscribe<MessageThrowIntegrationEvent, MessageThrowIntegrationEventHandler>("wfthrow.*.*");
+                        });
+                    ;
+                });
 }
 
 static void RegisterWorkflow(IServiceCollection services, string workflowId)
@@ -174,15 +175,6 @@ static void RegisterWorkflow(IServiceCollection services, string workflowId)
     });
 }
 
-static async Task InitEvenBusEvent(WebApplication app)
-{
-    var eventBus = app.Services.GetRequiredService<IWorkflowEventBus>();
-
-
-    await eventBus.SubscribeAsync<MessageThrowIntegrationEvent, MessageThrowIntegrationEventHandler>("wfthrow.*.*");
-    await eventBus.InitWorkflowIntegrationEventsAsync();
-}
-
 static async Task MigrateDbAsync(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
@@ -190,12 +182,8 @@ static async Task MigrateDbAsync(WebApplication app)
     {
         try
         {
-            var logContextFactory = scope.ServiceProvider.GetRequiredService<Func<WorkflowPersistDbContext, IntegrationEventLogContext>>();
             var persistContext = scope.ServiceProvider.GetRequiredService<WorkflowPersistDbContext>();
             await persistContext.MigrateAsync();
-
-            var logContext = logContextFactory(persistContext);
-            await logContext.MigrateAsync();
 
             var wfContext = scope.ServiceProvider.GetRequiredService<WorkflowDbContext>();
             await wfContext.MigrateAsync();
@@ -209,9 +197,15 @@ static async Task MigrateDbAsync(WebApplication app)
 
 static async Task StartWorkflowAsync(WebApplication app, string workflowId)
 {
+    MessageContext.Initialize(
+        correlationId: StringIdGenerator.Instance.GenerateUniqueId(),
+        causationId: workflowId,
+        executionId: StringIdGenerator.Instance.GenerateUniqueId(),
+        source: "wfhost"
+        );
     using var scope = app.Services.CreateScope();
     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-    var correlationId = new DefaultStringIdGenerator().GenerateUniqueId();
+    var correlationId = StringIdGenerator.Instance.GenerateUniqueId();
     var rs = await mediator.Send(new StartWorkflowCommand(workflowId, correlationId, "wf name"));
     Console.WriteLine(rs.ToString());
     if (rs.Succeeded)

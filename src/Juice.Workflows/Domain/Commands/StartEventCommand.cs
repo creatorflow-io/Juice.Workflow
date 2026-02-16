@@ -2,7 +2,7 @@
 
 namespace Juice.Workflows.Domain.Commands
 {
-    public class StartEventCommand<TEvent> : INodeCommand, IRequest<IOperationResult>
+    public record StartEventCommand<TEvent> : MessageBase, INodeCommand, IRequest<IOperationResult>
         where TEvent : Event
     {
         public string WorkflowId { get; init; }

@@ -1,6 +1,6 @@
 ﻿namespace Juice.Workflows.Domain.Commands
 {
-    public class StartWorkflowCommand :
+    public record StartWorkflowCommand : MessageBase,
         IRequest<IOperationResult<WorkflowExecutionResult>>, IWorkflowCommand
     {
         public StartWorkflowCommand(string workflowId, string? correlationId, string? name, Dictionary<string, object?>? parameters = default)

@@ -1,9 +1,15 @@
-﻿using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
+﻿using Juice.Messaging.Outbox;
+using Juice.Messaging.Outbox.EF;
+using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 
 namespace Juice.Workflows.EF
 {
-    public class WorkflowDbContext : DbContextBase
+    public class WorkflowDbContext : DbContextBase, IOutboxContext
     {
+
+        public DbSet<OutboxEvent> Outbox { get; set; } = default!;
+
+        public DbSet<OutboxDelivery> OutboxDeliveries { get; set; } = default!;
 
         public WorkflowDbContext(IServiceProvider serviceProvider, DbContextOptions<WorkflowDbContext> options) : base(options)
         {
@@ -51,6 +57,8 @@ namespace Juice.Workflows.EF
 
                 entity.HasIndex("CorrelationId", "CatchingKey");
             });
+
+            this.ConfigureOutbox(modelBuilder);
         }
     }
 

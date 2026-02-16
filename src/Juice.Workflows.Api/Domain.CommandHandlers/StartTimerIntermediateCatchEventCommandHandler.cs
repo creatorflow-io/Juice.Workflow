@@ -5,7 +5,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
 {
     public class StartTimerIntermediateCatchEventCommandHandler : StartTimerCommandHandlerBase<TimerIntermediateCatchEvent>
     {
-        public StartTimerIntermediateCatchEventCommandHandler(IWorkflowEventBus eventBus, IEventRepository eventRepository) : base(eventBus, eventRepository)
+        public StartTimerIntermediateCatchEventCommandHandler(IWorkflowOutboxService outbox, IEventRepository eventRepository) : base(outbox, eventRepository)
         {
         }
     }

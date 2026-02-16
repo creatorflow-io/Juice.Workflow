@@ -1,5 +1,5 @@
-﻿using Juice.EventBus;
-using Juice.Extensions;
+﻿using Juice.Extensions;
+using Juice.Messaging.Outbox;
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
@@ -11,12 +11,12 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
         IRequestHandler<StartTaskCommand<TTask>, IOperationResult>
         where TTask : Activity
     {
-        protected readonly IEventBus _eventBus;
+        protected readonly IOutboxService _outbox;
         protected readonly IEventRepository _eventRepository;
-        public StartTaskCommandHandlerBase(IEventBus eventBus, IEventRepository eventRepository)
+        public StartTaskCommandHandlerBase(IOutboxService outbox, IEventRepository eventRepository)
             : base(eventRepository)
         {
-            _eventBus = eventBus;
+            _outbox = outbox;
             _eventRepository = eventRepository;
         }
 
@@ -36,7 +36,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
                 var properties = request.Node.GetSharedProperties();
                 var @event = new MessageThrowIntegrationEvent(GetThrowEventKey(request), callbackEvent.Id, request.CorrelationId, properties);
 
-                await _eventBus.PublishAsync(@event);
+                await _outbox.AddEventAsync(@event);
                 return OperationResult.Success;
             }
             catch (Exception ex)

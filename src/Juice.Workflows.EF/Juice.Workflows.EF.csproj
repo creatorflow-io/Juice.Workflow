@@ -13,6 +13,8 @@
 
     <ItemGroup>
         <PackageReference Include="Juice.EF" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Messaging.Outbox.EF" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Messaging.Outbox.Delivery" Version="$(JuiceVersion)" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EFVersion)" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(EFVersion)" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(NpgsqlVersion)" />

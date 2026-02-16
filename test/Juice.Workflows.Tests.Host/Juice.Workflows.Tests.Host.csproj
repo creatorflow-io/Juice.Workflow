@@ -8,9 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Juice.Integrations" Version="$(JuiceVersion)" />
-        <PackageReference Include="Juice.MediatR.RequestManager.Redis" Version="$(JuiceVersion)" />
-        <PackageReference Include="Juice.EventBus.IntegrationEventLog.EF.PostgreSQL" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.MediatR.Behaviors" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Messaging.Outbox.Delivery" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.Messaging.Idempotency.Redis" Version="$(JuiceVersion)" />
         <PackageReference Include="Juice.EventBus.RabbitMQ" Version="$(JuiceVersion)" />
     </ItemGroup>
     <ItemGroup>

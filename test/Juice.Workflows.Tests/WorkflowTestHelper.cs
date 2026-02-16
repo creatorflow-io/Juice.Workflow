@@ -84,7 +84,7 @@ namespace Juice.Workflows.Tests
 
                     var events = context.State
                         .BlockingNodes.Where(b =>
-                            context.GetNode(b.Id).Node is IEvent);
+                            context.GetNode(b.Id).Node is IEventNode);
 
                     if (events.Any())
                     {
@@ -173,7 +173,7 @@ namespace Juice.Workflows.Tests
 
                     var events = context.State
                         .BlockingNodes.Where(b =>
-                            context.GetNode(b.Id).Node is IEvent);
+                            context.GetNode(b.Id).Node is IEventNode);
 
                     if (events.Any())
                     {

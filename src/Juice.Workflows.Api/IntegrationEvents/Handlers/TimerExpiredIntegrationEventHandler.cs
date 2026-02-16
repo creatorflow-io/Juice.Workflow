@@ -21,7 +21,11 @@ namespace Juice.Workflows.Api.IntegrationEvents.Handlers
             {
                 if (Guid.TryParse(@event.CorrelationId, out var callbackId))
                 {
-                    await _mediator.Send(new DispatchWorkflowEventCommand(callbackId, true, default));
+                    var result = await _mediator.Send(new DispatchWorkflowEventCommand(callbackId, true, default));
+                    if (!result.Succeeded)
+                    {
+                        _logger.LogError("Failed to dispatch workflow event for timer. {id}, {error}", @event.CorrelationId ?? "", result.ToString());
+                    }
                 }
                 else
                 {

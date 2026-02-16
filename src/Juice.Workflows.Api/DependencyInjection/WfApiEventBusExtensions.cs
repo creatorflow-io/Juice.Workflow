@@ -1,17 +1,20 @@
-﻿using Juice.EventBus;
-using Juice.Timers.Api.IntegrationEvents.Events;
+﻿using Juice.Timers.Api.IntegrationEvents.Events;
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
 using Juice.Workflows.Api.IntegrationEvents.Handlers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Juice.Workflows.Api
 {
     public static class WfApiEventBusExtensions
     {
-        public static async Task InitWorkflowIntegrationEventsAsync(this IEventBus eventBus)
+        public static EventBusBuilder SubscribeWorkflowIntegrationEvents(this EventBusBuilder eventBus)
         {
-            await eventBus.SubscribeAsync<TimerExpiredIntegrationEvent, TimerExpiredIntegrationEventHandler>();
-
-            await eventBus.SubscribeAsync<MessageCatchIntegrationEvent, MessageCatchIntegrationEventHandler>("wfcatch.*.#");
+            eventBus.AddConsumerServices(subs =>
+            {
+                subs.Subscribe<TimerExpiredIntegrationEvent, TimerExpiredIntegrationEventHandler>("timer.expired.workflow");
+                subs.Subscribe<MessageCatchIntegrationEvent, MessageCatchIntegrationEventHandler>("wfcatch.*.#");
+            });
+            return eventBus;
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using Juice.EventBus;
-using Juice.Extensions;
+﻿using Juice.Extensions;
+using Juice.Messaging.Outbox;
 using Juice.Timers.Api.IntegrationEvents.Events;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
@@ -11,12 +11,12 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
         IRequestHandler<StartEventCommand<TEvent>, IOperationResult>
         where TEvent : Event
     {
-        private readonly IEventBus _eventBus;
+        private readonly IOutboxService _outbox;
         private readonly IEventRepository _eventRepository;
-        public StartTimerCommandHandlerBase(IEventBus eventBus, IEventRepository eventRepository)
+        public StartTimerCommandHandlerBase(IOutboxService outbox, IEventRepository eventRepository)
             : base(eventRepository)
         {
-            _eventBus = eventBus;
+            _outbox = outbox;
             _eventRepository = eventRepository;
         }
         public override async ValueTask<IOperationResult> Handle(StartEventCommand<TEvent> request, CancellationToken cancellationToken)
@@ -39,7 +39,7 @@ namespace Juice.Workflows.Api.Domain.CommandHandlers
 
                 var @event = new TimerStartIntegrationEvent("workflow", callbackEvent.Id.ToString(), DateTimeOffset.Now.Add(after));
 
-                await _eventBus.PublishAsync(@event);
+                await _outbox.AddEventAsync(@event);
                 return OperationResult.Success;
             }
             catch (Exception ex)

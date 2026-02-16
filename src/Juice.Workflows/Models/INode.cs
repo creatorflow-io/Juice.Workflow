@@ -26,16 +26,16 @@
 
     }
 
-    public interface IEvent : INode
+    public interface IEventNode : INode
     {
     }
 
-    public interface IIntermediate : IEvent
+    public interface IIntermediate : IEventNode
     {
 
     }
 
-    public interface IThrowing : IEvent
+    public interface IThrowing : IEventNode
     {
 
     }
@@ -51,7 +51,7 @@
         void NonInterupt();
     }
 
-    public interface ICatching : IEvent
+    public interface ICatching : IEventNode
     {
 
     }

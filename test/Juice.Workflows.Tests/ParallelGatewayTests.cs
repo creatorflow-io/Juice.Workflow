@@ -17,7 +17,7 @@
             {
                 CurrentDirectory = AppContext.BaseDirectory
             };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
 
             resolver.ConfigureServices(services =>
             {
@@ -99,7 +99,7 @@
             {
                 CurrentDirectory = AppContext.BaseDirectory
             };
-            var workflowId = new DefaultStringIdGenerator().GenerateRandomId(6);
+            var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
 
             resolver.ConfigureServices(services =>
             {

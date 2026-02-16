@@ -1,6 +1,6 @@
 ﻿namespace Juice.Workflows.Domain.Events
 {
-    public class DefinitionDataChangedDomainEvent : INotification
+    public record DefinitionDataChangedDomainEvent : MessageBase, INotification
     {
         public WorkflowDefinition WorkflowDefinition { get; init; }
 
