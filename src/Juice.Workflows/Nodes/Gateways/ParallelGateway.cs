@@ -30,7 +30,18 @@
 
         }
 
-        public override Task<NodeExecutionResult> ResumeAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token)
-            => throw new NotImplementedException();
+        /// <summary>
+        /// All outgoing flows are always activated (fork / diverge).
+        /// </summary>
+        public override Task<bool?> PreSelectOutgoingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+            => Task.FromResult<bool?>(true);
+
+        /// <summary>
+        /// All incoming flows are accepted (join / converge waits for all tokens in StartAsync).
+        /// </summary>
+        public override Task<bool?> PreSelectIncomingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+            => Task.FromResult<bool?>(true);
     }
 }

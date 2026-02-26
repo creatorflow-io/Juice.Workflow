@@ -148,7 +148,7 @@ namespace Juice.Workflows.Execution
         /// <summary>
         /// A dictionary of re-hydrated values provided by the initiator of the workflow.
         /// </summary>
-        public IDictionary<string, object?> Input { get; private set; }
+        public IDictionary<string, object?> Input { get; private set; } = new Dictionary<string, object?>();
 
         /// <summary>
         /// A dictionary of node's output

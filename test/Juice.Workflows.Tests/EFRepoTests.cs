@@ -138,6 +138,7 @@ namespace Juice.Workflows.Tests
         [IgnoreOnCITheory(DisplayName = "State should persist to DB"), TestPriority(800)]
         [InlineData("SqlServer")]
         [InlineData("PostgreSQL")]
+        [InitializeMessageContext]
         public async Task Should_persist_state_to_db_Async(string provider)
         {
             var resolver = new DependencyResolver
@@ -222,7 +223,7 @@ namespace Juice.Workflows.Tests
                 var context = await contextResolver.StateResolveAsync(workflowId, default, default);
 
                 context.Should().NotBeNull();
-                _output.WriteLine("Builder: " + context.ResolvedBy);
+                _output.WriteLine("Builder: " + context!.ResolvedBy);
                 _output.WriteLine(ContextPrintHelper.Visualize(context));
             }
         }

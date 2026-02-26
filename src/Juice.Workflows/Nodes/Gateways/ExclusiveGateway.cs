@@ -25,14 +25,37 @@
             return SourceOutcomes(workflowContext, flow);
         }
 
-        public override Task<NodeExecutionResult> ResumeAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token) => throw new NotImplementedException();
 
-        public override Task PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token)
+        /// <summary>
+        /// Block outgoing flow selection if a flow from this gateway is already active
+        /// (only one branch may be taken at a time).
+        /// </summary>
+        public override Task<bool?> PreSelectOutgoingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+        {
+            if (context.AnyActiveFlowFrom(source))
+                return Task.FromResult<bool?>(false);
+            return Task.FromResult<bool?>(null);
+        }
+
+        /// <summary>
+        /// Block incoming flow if another flow is already active toward this gateway
+        /// (exclusive convergence: only one token may arrive).
+        /// </summary>
+        public override Task<bool?> PreSelectIncomingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+        {
+            if (context.AnyActiveFlowTo(dest, default))
+                return Task.FromResult<bool?>(false);
+            return Task.FromResult<bool?>(null);
+        }
+
+        public override Task<NodeExecutionResult?> PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token)
         {
             _logger.LogInformation(node.Record.Name + " post check");
             if (!workflowContext.AnyActiveFlowFrom(node))
             {
-                throw new InvalidOperationException("No sequence flow can be selected. To ensure a sequence flow will always be selected, have no condition on one of your flows");
+                return Task.FromResult<NodeExecutionResult?>(Fault("No sequence flow can be selected. To ensure a sequence flow will always be selected, have no condition on one of your flows"));
             }
 
             return base.PostExecuteCheckAsync(workflowContext, node, token);

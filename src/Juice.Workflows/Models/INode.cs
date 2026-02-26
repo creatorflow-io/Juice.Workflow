@@ -64,10 +64,25 @@
     public interface IGateway : INode
     {
         /// <summary>
-        /// Check after executed.
+        /// Check after executed. Returns a fault result if the gateway state is invalid,
+        /// or null to indicate the check passed.
         /// </summary>
-        Task PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node,
+        Task<NodeExecutionResult?> PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node,
             CancellationToken token);
+
+        /// <summary>
+        /// Called when this gateway is the SOURCE of a candidate outgoing flow.
+        /// Returns true to allow, false to block, or null to defer to standard condition matching.
+        /// </summary>
+        Task<bool?> PreSelectOutgoingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow);
+
+        /// <summary>
+        /// Called when this gateway is the DESTINATION of a candidate incoming flow.
+        /// Returns true to allow, false to block, or null to defer to standard condition matching.
+        /// </summary>
+        Task<bool?> PreSelectIncomingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow);
     }
 
     public interface IExclusive : IGateway { }

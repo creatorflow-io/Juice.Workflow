@@ -12,7 +12,7 @@
         {
             if (flow == null)
             {
-                return Fault("InclusiveGateway required atleast one incoming flow");
+                return Fault("InclusiveGateway required at least one incoming flow");
             }
             if (workflowContext.AnyIncompleteActivePathTo(node))
             {
@@ -21,6 +21,5 @@
 
             return JoinnedOutcomes(workflowContext, node);
         }
-        public override Task<NodeExecutionResult> ResumeAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token) => throw new NotImplementedException();
     }
 }

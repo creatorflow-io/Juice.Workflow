@@ -27,17 +27,38 @@
             return SourceOutcomes(workflowContext, flow);
         }
 
-        public override Task<NodeExecutionResult> ResumeAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token) => throw new NotImplementedException();
+        /// <summary>
+        /// All outgoing flows are activated (each connects to an intermediate catch event).
+        /// Throws for invalid workflow structure: targets must be intermediate catching events.
+        /// </summary>
+        public override Task<bool?> PreSelectOutgoingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+        {
+            if (!(dest.Node is IIntermediate && dest.Node is ICatching))
+                throw new InvalidOperationException("The nodes next to EventBasedGateway must be intermediate catching event");
+            return Task.FromResult<bool?>(true);
+        }
 
-        public override async Task PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token)
+        /// <summary>
+        /// Only one token may arrive at a time (exclusive convergence).
+        /// </summary>
+        public override Task<bool?> PreSelectIncomingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+        {
+            if (context.AnyActiveFlowTo(dest, default))
+                return Task.FromResult<bool?>(false);
+            return Task.FromResult<bool?>(null);
+        }
+
+        public override Task<NodeExecutionResult?> PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token)
         {
             _logger.LogInformation(node.Record.Name + " post check");
             if (!workflowContext.AnyActiveFlowFrom(node))
             {
-                throw new InvalidOperationException("No sequence flow can be selected. To ensure a sequence flow will always be selected, have no condition on one of your flows");
+                return Task.FromResult<NodeExecutionResult?>(Fault("No sequence flow can be selected. To ensure a sequence flow will always be selected, have no condition on one of your flows"));
             }
 
-            await base.PostExecuteCheckAsync(workflowContext, node, token);
+            return base.PostExecuteCheckAsync(workflowContext, node, token);
         }
 
     }

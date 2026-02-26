@@ -297,7 +297,13 @@
 
                 if (nodeContext.Node is IGateway gateway)
                 {
-                    await gateway.PostExecuteCheckAsync(workflowContext, nodeContext, token);
+                    var checkResult = await gateway.PostExecuteCheckAsync(workflowContext, nodeContext, token);
+                    if (checkResult != null)
+                    {
+                        workflowContext.ProcessNodeExecutionResult(nodeContext, checkResult);
+                        _hasFailure = true;
+                        return checkResult;
+                    }
                 }
 
                 #region Sub-process finished
