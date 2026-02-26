@@ -1,6 +1,7 @@
 ﻿using Juice.Workflows.Builder;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.InMemory;
+using Juice.Workflows.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -11,6 +12,7 @@ namespace Juice.Workflows
         public static IServiceCollection AddWorkflowServices(this IServiceCollection services)
         {
             services.AddScoped<IWorkflow, Workflow>();
+            services.TryAddTransient<IConditionEvaluator, OutcomeConditionEvaluator>();
 
             services.AddTransient<WorkflowExecutor>();
 

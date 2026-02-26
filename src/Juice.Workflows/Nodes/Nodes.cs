@@ -94,8 +94,25 @@ namespace Juice.Workflows.Nodes
             return Outcomes(outcomes.ToArray());
         }
 
-        public virtual Task PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token)
-            => Task.CompletedTask;
+        public virtual Task<NodeExecutionResult?> PostExecuteCheckAsync(WorkflowContext workflowContext, NodeContext node, CancellationToken token)
+            => Task.FromResult<NodeExecutionResult?>(null);
+
+        public virtual Task<bool?> PreSelectOutgoingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+            => Task.FromResult<bool?>(null);
+
+        public virtual Task<bool?> PreSelectIncomingFlowAsync(WorkflowContext context, NodeContext source,
+            NodeContext dest, FlowContext flow)
+            => Task.FromResult<bool?>(null);
+
+        /// <summary>
+        /// Gateways are synchronous decision points and never enter a halted/blocking state,
+        /// so ResumeAsync should never be called. Returns a fault result defensively rather
+        /// than throwing, so the workflow transitions to Faulted instead of crashing.
+        /// </summary>
+        public override Task<NodeExecutionResult> ResumeAsync(WorkflowContext workflowContext,
+            NodeContext node, CancellationToken token)
+            => Task.FromResult(Fault($"Gateway '{node.DisplayName}' does not support resumption."));
 
     }
 

@@ -2,56 +2,47 @@
 {
     public class SequenceFlow : IFlow
     {
+        private readonly IConditionEvaluator _evaluator;
+
+        public SequenceFlow() : this(OutcomeConditionEvaluator.Default) { }
+
+        public SequenceFlow(IConditionEvaluator evaluator)
+        {
+            _evaluator = evaluator;
+        }
+
         public async Task<bool> PreSelectCheckAsync(WorkflowContext context, NodeContext source,
             NodeContext dest, FlowContext flow)
         {
             await Task.Yield();
+
+            // Default flows are always selected regardless of conditions.
             if (context.IsDefaultOutgoing(flow, source))
-            {
                 return true;
-            }
-            #region ExclusiveGateway rules
 
-            if (source.Node is IExclusive
-                && !(source.Node is IEventBased)
-                && context.AnyActiveFlowFrom(source))
+            // Let the source gateway decide whether this outgoing flow should be activated.
+            if (source.Node is IGateway sourceGateway)
             {
-                return false;
+                var result = await sourceGateway.PreSelectOutgoingFlowAsync(context, source, dest, flow);
+                if (result.HasValue)
+                    return result.Value;
+                // null = no opinion from the gateway; fall through to condition matching below.
             }
 
-            if (dest.Node is IExclusive
-                && context.AnyActiveFlowTo(dest, default))
+            // Let the destination gateway decide whether this incoming flow is acceptable.
+            if (dest.Node is IGateway destGateway)
             {
-                return false;
-            }
-            #endregion
-
-            #region ParallelGateway rules
-            if (source.Node is ParallelGateway || dest.Node is ParallelGateway)
-            {
-                return true;
-            }
-            #endregion
-
-            #region EventBasedGateway rules
-
-            if (source.Node is IEventBased)
-            {
-                if (!(dest.Node is IIntermediate && dest.Node is ICatching))
-                {
-                    throw new InvalidOperationException("The nodes next to EventBasedGateway must be intermediate caching event");
-                }
-                return true;
+                var result = await destGateway.PreSelectIncomingFlowAsync(context, source, dest, flow);
+                if (result.HasValue)
+                    return result.Value;
             }
 
-            #endregion
-
+            // Unconditional flow: always selected.
             if (flow.Record.ConditionExpression == null)
-            {
                 return true;
-            }
-            //@TODO: expresion check
-            return context.GetOutcomes(source.Record.Id).Contains(flow.Record.ConditionExpression);
+
+            // Evaluate the condition expression against the source node's current context.
+            return await _evaluator.EvaluateAsync(flow.Record.ConditionExpression, context, source);
         }
 
         #region IDisposable Support
