@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Juice.Services;
+using Juice.Workflows.Nodes.Gateways;
 
 namespace Juice.Workflows.Builder
 {
@@ -158,6 +160,20 @@ namespace Juice.Workflows.Builder
         private Stack<string> _branchActivities = new Stack<string>();
         private Stack<string> _gateways = new Stack<string>();
 
+        public WorkflowContextBuilder Logic(string? name = default,
+            GatewayRoutingMode mode = GatewayRoutingMode.Exclusive)
+        {
+            Gateway<LogicGateway>(name);
+            // Store routing mode in the gateway node's properties
+            if (string.IsNullOrEmpty(_currentNodeId))
+                throw new InvalidOperationException("No current node after adding LogicGateway");
+            _properties[_currentNodeId] = new Dictionary<string, object?>
+            {
+                { "mode", mode.ToString().ToLowerInvariant() }
+            };
+            return this;
+        }
+
         public WorkflowContextBuilder Exclusive(string? name = default)
             => Gateway<ExclusiveGateway>(name);
 
@@ -170,7 +186,7 @@ namespace Juice.Workflows.Builder
         public WorkflowContextBuilder Parallel(string? name = default)
             => Gateway<ParallelGateway>(name);
 
-        private WorkflowContextBuilder Gateway<T>(string? name)
+        public WorkflowContextBuilder Gateway<T>(string? name = default)
             where T : class, IGateway
         {
             if (string.IsNullOrEmpty(_currentNodeId))

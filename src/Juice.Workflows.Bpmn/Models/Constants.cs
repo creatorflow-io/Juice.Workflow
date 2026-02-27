@@ -8,7 +8,7 @@
                 { "tInclusiveGateway", "InclusiveGateway"},
                 { "tExclusiveGateway", "ExclusiveGateway" },
                 { "tEventBasedGateway", "EventBasedGateway"},
-                //{ "tComplexGateway", "ComplexGateway"},
+                { "tComplexGateway", "LogicGateway"},
                 //{ "tStartEvent", "StartEvent"},
                 { "tUserTask", "UserTask"},
                 { "tServiceTask", "ServiceTask"},

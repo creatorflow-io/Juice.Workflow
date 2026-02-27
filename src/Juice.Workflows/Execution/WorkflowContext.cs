@@ -346,8 +346,10 @@ namespace Juice.Workflows.Execution
             {
                 throw new InvalidOperationException("Ancestor node not found");
             }
-            if (ancestor.Node is InclusiveGateway)
+            if (ancestor.Node is ISelectiveGateway)
             {
+                // Selective gateways (InclusiveGateway, LogicGateway, etc.) explicitly choose
+                // which outgoing flows are activated. Any flow they did not select is a dead path.
                 return false;
             }
 

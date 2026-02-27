@@ -4,6 +4,7 @@ using Juice.Workflows.InMemory;
 using Juice.Workflows.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Juice.Workflows.Nodes.Gateways;
 
 namespace Juice.Workflows
 {
@@ -13,6 +14,7 @@ namespace Juice.Workflows
         {
             services.AddScoped<IWorkflow, Workflow>();
             services.TryAddTransient<IConditionEvaluator, OutcomeConditionEvaluator>();
+            services.TryAddTransient<ILogicConditionEvaluator, SimpleExpressionEvaluator>();
 
             services.AddTransient<WorkflowExecutor>();
 

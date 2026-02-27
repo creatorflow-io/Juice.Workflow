@@ -1,6 +1,6 @@
 ﻿namespace Juice.Workflows.Nodes.Gateways
 {
-    public class InclusiveGateway : Gateway
+    public class InclusiveGateway : Gateway, ISelectiveGateway
     {
         public InclusiveGateway(IStringLocalizerFactory stringLocalizer) : base(stringLocalizer)
         {
