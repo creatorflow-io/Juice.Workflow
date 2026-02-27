@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Juice.Workflows.Models
 {
     /// <summary>
@@ -51,7 +53,11 @@ namespace Juice.Workflows.Models
             var i = 0;
             while (i < expression.Length)
             {
-                if (char.IsWhiteSpace(expression[i])) { i++; continue; }
+                if (char.IsWhiteSpace(expression[i]))
+                {
+                    i++;
+                    continue;
+                }
 
                 // Two-char operators
                 if (i + 1 < expression.Length)
@@ -83,8 +89,11 @@ namespace Juice.Workflows.Models
                 {
                     i++;
                 }
+
                 if (i > start)
+                {
                     tokens.Add(expression.Substring(start, i - start));
+                }
             }
             return tokens;
         }
@@ -132,9 +141,13 @@ namespace Juice.Workflows.Models
                 pos++; // consume "("
                 var result = ParseExpression(tokens, ref pos, context);
                 if (pos < tokens.Count && tokens[pos] == ")")
+                {
                     pos++; // consume ")"
+                }
                 else
+                {
                     throw new FormatException("Expected closing parenthesis");
+                }
                 return result;
             }
             return ParseComparison(tokens, ref pos, context);
@@ -146,7 +159,9 @@ namespace Juice.Workflows.Models
         private bool ParseComparison(List<string> tokens, ref int pos, WorkflowContext context)
         {
             if (pos + 2 >= tokens.Count)
+            {
                 throw new FormatException($"Incomplete comparison expression near token position {pos}");
+            }
 
             var variable = tokens[pos++];
             var op = tokens[pos++];
@@ -167,19 +182,25 @@ namespace Juice.Workflows.Models
 
         private static object? ResolveVariable(string key, WorkflowContext context)
         {
-            // Support dot-path keys (e.g. "order.status") via simple dictionary lookup
+            // Support dot-path keys (e.g. "order.status") via simple dictionary lookup.
             // For nested paths the caller must store them with the dot-path key.
             if (context.Input != null && context.Input.TryGetValue(key, out var inputValue))
+            {
                 return inputValue;
+            }
             if (context.Output != null && context.Output.TryGetValue(key, out var outputValue))
+            {
                 return outputValue;
+            }
             return null;
         }
 
         private static bool Compare(object? value, string op, string literal)
         {
             if (value == null)
+            {
                 return false; // missing variable → false
+            }
 
             // Try numeric comparison
             if (TryParseDecimal(literal, out var literalNum) && TryToDecimal(value, out var valueNum))
@@ -211,14 +232,13 @@ namespace Juice.Workflows.Models
         }
 
         private static bool TryParseDecimal(string s, out decimal value)
-            => decimal.TryParse(s, System.Globalization.NumberStyles.Number,
-                System.Globalization.CultureInfo.InvariantCulture, out value);
+            => decimal.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out value);
 
         private static bool TryToDecimal(object? value, out decimal result)
         {
             try
             {
-                result = Convert.ToDecimal(value, System.Globalization.CultureInfo.InvariantCulture);
+                result = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
                 return true;
             }
             catch

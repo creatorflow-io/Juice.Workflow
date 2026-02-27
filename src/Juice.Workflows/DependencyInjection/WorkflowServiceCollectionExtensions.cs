@@ -4,7 +4,6 @@ using Juice.Workflows.InMemory;
 using Juice.Workflows.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Juice.Workflows.Nodes.Gateways;
 
 namespace Juice.Workflows
 {

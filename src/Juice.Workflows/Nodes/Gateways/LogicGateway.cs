@@ -1,5 +1,3 @@
-using Juice.Workflows.Models;
-
 namespace Juice.Workflows.Nodes.Gateways
 {
     /// <summary>
