@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Juice.Workflows.Nodes.Gateways;
 
 namespace Juice.Workflows.Tests
 {
@@ -63,7 +62,7 @@ namespace Juice.Workflows.Tests
         [InlineData(150, true)]
         [InlineData(50, false)]
         [InlineData(100, false)]
-        public async Task Evaluator_numeric_greater_than(int total, bool expected)
+        public async Task Evaluator_numeric_greater_than_Async(int total, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "total", total } });
@@ -74,7 +73,7 @@ namespace Juice.Workflows.Tests
         [Theory(DisplayName = "Numeric < comparison")]
         [InlineData(50, true)]
         [InlineData(150, false)]
-        public async Task Evaluator_numeric_less_than(int total, bool expected)
+        public async Task Evaluator_numeric_less_than_Async(int total, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "total", total } });
@@ -86,7 +85,7 @@ namespace Juice.Workflows.Tests
         [InlineData(100, true)]
         [InlineData(101, true)]
         [InlineData(99, false)]
-        public async Task Evaluator_numeric_greater_or_equal(int total, bool expected)
+        public async Task Evaluator_numeric_greater_or_equal_Async(int total, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "total", total } });
@@ -98,7 +97,7 @@ namespace Juice.Workflows.Tests
         [InlineData(100, true)]
         [InlineData(99, true)]
         [InlineData(101, false)]
-        public async Task Evaluator_numeric_less_or_equal(int total, bool expected)
+        public async Task Evaluator_numeric_less_or_equal_Async(int total, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "total", total } });
@@ -109,7 +108,7 @@ namespace Juice.Workflows.Tests
         [Theory(DisplayName = "String == equality")]
         [InlineData("approved", true)]
         [InlineData("rejected", false)]
-        public async Task Evaluator_string_equality(string status, bool expected)
+        public async Task Evaluator_string_equality_Async(string status, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "status", status } });
@@ -120,7 +119,7 @@ namespace Juice.Workflows.Tests
         [Theory(DisplayName = "String != inequality")]
         [InlineData("user", true)]
         [InlineData("admin", false)]
-        public async Task Evaluator_string_inequality(string role, bool expected)
+        public async Task Evaluator_string_inequality_Async(string role, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "role", role } });
@@ -132,7 +131,7 @@ namespace Juice.Workflows.Tests
         [InlineData(150, "approved", true)]
         [InlineData(50, "approved", false)]
         [InlineData(150, "rejected", false)]
-        public async Task Evaluator_and_keyword(int total, string status, bool expected)
+        public async Task Evaluator_and_keyword_Async(int total, string status, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "total", total }, { "status", status } });
@@ -146,7 +145,7 @@ namespace Juice.Workflows.Tests
         [InlineData("approved", true)]
         [InlineData("pending", true)]
         [InlineData("rejected", false)]
-        public async Task Evaluator_or_keyword(string status, bool expected)
+        public async Task Evaluator_or_keyword_Async(string status, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "status", status } });
@@ -161,7 +160,7 @@ namespace Juice.Workflows.Tests
         [InlineData("pending", 8, true)]
         [InlineData("approved", 3, false)]
         [InlineData("rejected", 8, false)]
-        public async Task Evaluator_parentheses_grouping(string status, int priority, bool expected)
+        public async Task Evaluator_parentheses_grouping_Async(string status, int priority, bool expected)
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?>
@@ -175,7 +174,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "AND binds tighter than OR — precedence")]
-        public async Task Evaluator_and_binds_tighter_than_or()
+        public async Task Evaluator_and_binds_tighter_than_or_Async()
         {
             var evaluator = CreateEvaluator();
             // "a OR b AND c" should be "a OR (b AND c)"
@@ -191,7 +190,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "Missing variable evaluates to false")]
-        public async Task Evaluator_missing_variable_returns_false()
+        public async Task Evaluator_missing_variable_returns_false_Async()
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?>());
@@ -200,7 +199,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "Malformed expression returns false without throwing")]
-        public async Task Evaluator_malformed_expression_returns_false()
+        public async Task Evaluator_malformed_expression_returns_false_Async()
         {
             var evaluator = CreateEvaluator();
             var context = CreateContextWithInput(new Dictionary<string, object?> { { "x", 1 } });
@@ -248,7 +247,7 @@ namespace Juice.Workflows.Tests
         [Theory(DisplayName = "Exclusive mode: only matching branch executes")]
         [InlineData(500, "low")]    // total <= 1000 → "low" branch
         [InlineData(2000, "high")]  // total > 1000  → "high" branch
-        public async Task Logic_exclusive_routes_single_branch(int total, string expectedBranch)
+        public async Task Logic_exclusive_routes_single_branch_Async(int total, string expectedBranch)
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
@@ -278,7 +277,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "Exclusive mode: first match wins when multiple conditions true")]
-        public async Task Logic_exclusive_first_match_wins()
+        public async Task Logic_exclusive_first_match_wins_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
@@ -310,7 +309,7 @@ namespace Juice.Workflows.Tests
         // ─────────────────────────────────────────────────────────────────────
 
         [Fact(DisplayName = "Inclusive mode: all matching branches execute")]
-        public async Task Logic_inclusive_all_matching_branches_execute()
+        public async Task Logic_inclusive_all_matching_branches_execute_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
@@ -337,7 +336,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "Inclusive mode: only one matching branch executes when one condition false")]
-        public async Task Logic_inclusive_one_branch_when_one_condition_false()
+        public async Task Logic_inclusive_one_branch_when_one_condition_false_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
@@ -367,7 +366,7 @@ namespace Juice.Workflows.Tests
         // ─────────────────────────────────────────────────────────────────────
 
         [Fact(DisplayName = "No condition matches and no default flow → workflow faults")]
-        public async Task Logic_no_match_no_default_faults()
+        public async Task Logic_no_match_no_default_faults_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
@@ -399,7 +398,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "Custom evaluator replaces default and controls routing")]
-        public async Task Logic_custom_evaluator_replaces_default()
+        public async Task Logic_custom_evaluator_replaces_default_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId,
@@ -457,7 +456,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "LogicGateway subclass can override routing via PreSelectOutgoingFlowAsync")]
-        public async Task Logic_subclass_overrides_routing()
+        public async Task Logic_subclass_overrides_routing_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId,
@@ -535,7 +534,7 @@ namespace Juice.Workflows.Tests
         }
 
         [Fact(DisplayName = "Exception in custom evaluator transitions workflow to Faulted")]
-        public async Task Logic_exception_in_evaluator_faults_workflow()
+        public async Task Logic_exception_in_evaluator_faults_workflow_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var resolver = new DependencyResolver { CurrentDirectory = AppContext.BaseDirectory };
@@ -587,7 +586,7 @@ namespace Juice.Workflows.Tests
         // ─────────────────────────────────────────────────────────────────────
 
         [Fact(DisplayName = "Default (unconditional) fallback flow activates when no conditions match")]
-        public async Task Logic_default_flow_activates_when_no_match()
+        public async Task Logic_default_flow_activates_when_no_match_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
@@ -617,7 +616,7 @@ namespace Juice.Workflows.Tests
         // ─────────────────────────────────────────────────────────────────────
 
         [Fact(DisplayName = "Inclusive mode: no match + no default → workflow faults")]
-        public async Task Logic_inclusive_no_match_faults()
+        public async Task Logic_inclusive_no_match_faults_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
@@ -643,7 +642,7 @@ namespace Juice.Workflows.Tests
         // ─────────────────────────────────────────────────────────────────────
 
         [Fact(DisplayName = "Inclusive mode with AND/OR compound conditions routes correctly")]
-        public async Task Logic_inclusive_compound_conditions()
+        public async Task Logic_inclusive_compound_conditions_Async()
         {
             var workflowId = StringIdGenerator.Instance.GenerateRandomId(6);
             var sp = BuildServiceProvider(workflowId, builder =>
