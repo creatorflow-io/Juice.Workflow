@@ -87,4 +87,11 @@
 
     public interface IExclusive : IGateway { }
     public interface IEventBased : IGateway { }
+
+    /// <summary>
+    /// Marker interface for gateways that make explicit flow selections.
+    /// Any outgoing flow that was NOT selected by this gateway is considered a dead path —
+    /// <see cref="WorkflowContext.AnyIncompleteActivePathTo"/> will treat it as inactive.
+    /// </summary>
+    public interface ISelectiveGateway : IGateway { }
 }
