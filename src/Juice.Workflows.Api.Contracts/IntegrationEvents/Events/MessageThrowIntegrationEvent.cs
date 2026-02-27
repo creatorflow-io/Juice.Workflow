@@ -1,4 +1,4 @@
-﻿using Juice.EventBus;
+﻿using Juice.Messaging;
 
 namespace Juice.Workflows.Api.Contracts.IntegrationEvents.Events
 {

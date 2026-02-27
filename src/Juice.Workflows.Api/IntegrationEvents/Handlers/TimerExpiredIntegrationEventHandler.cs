@@ -1,4 +1,4 @@
-﻿using Juice.EventBus;
+﻿using Juice.Messaging;
 using Juice.Timers.Api.IntegrationEvents.Events;
 using Juice.Workflows.Domain.Commands;
 using Microsoft.Extensions.Logging;

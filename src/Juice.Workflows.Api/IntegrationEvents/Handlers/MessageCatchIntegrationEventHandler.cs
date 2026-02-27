@@ -1,4 +1,4 @@
-﻿using Juice.EventBus;
+﻿using Juice.Messaging;
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
 using Juice.Workflows.Domain.AggregatesModel.EventAggregate;
 using Juice.Workflows.Domain.Commands;
