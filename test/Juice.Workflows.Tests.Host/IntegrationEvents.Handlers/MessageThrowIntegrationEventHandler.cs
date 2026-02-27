@@ -1,4 +1,4 @@
-﻿using Juice.EventBus;
+﻿using Juice.Messaging;
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
 using Newtonsoft.Json;
 
