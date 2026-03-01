@@ -1,6 +1,6 @@
 ﻿namespace Juice.Workflows.Nodes.Events
 {
-    public class StartEvent : Event, ICatching
+    public class StartEvent : Event, ICatching, IStartNode
     {
 
         public StartEvent(IStringLocalizerFactory stringLocalizer) : base(stringLocalizer)
@@ -14,7 +14,7 @@
 
         public override Task<NodeExecutionResult> StartAsync(WorkflowContext workflowContext, NodeContext node, FlowContext? flowContext, CancellationToken token)
         {
-            workflowContext.AddDomainEvent(new ProcessStartedDomainEvent(node));
+            workflowContext.AddDomainEvent(new ProcessStartedDomainEvent(node.Record));
             return Task.FromResult(Outcomes("Catched"));
         }
 

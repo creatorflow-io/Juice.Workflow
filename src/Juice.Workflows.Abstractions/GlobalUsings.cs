@@ -1,0 +1,11 @@
+﻿global using Juice.MediatR;
+global using Microsoft.Extensions.Localization;
+global using Newtonsoft.Json;
+global using Juice.Extensions;
+global using Juice.Workflows.Models;
+global using Juice.Workflows.Execution;
+global using Juice.Workflows.Domain.AggregatesModel.DefinitionAggregate;
+global using Juice.Workflows.Domain.AggregatesModel.WorkflowAggregate;
+global using Juice.Workflows.Domain.AggregatesModel.WorkflowStateAggregate;
+global using Juice.Workflows.Domain.Events;
+global using Microsoft.Extensions.Logging;

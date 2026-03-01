@@ -14,7 +14,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+        <ProjectReference Include="..\Juice.Workflows.Abstractions\Juice.Workflows.Abstractions.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="*" />
     </ItemGroup>
 </Project>
