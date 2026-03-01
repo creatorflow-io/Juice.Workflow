@@ -9,6 +9,26 @@
         {
             _dbContext = dbContext;
         }
+
+        public async Task<IEnumerable<WorkflowDefinitionSummary>> ListAsync(WorkflowDefinitionStatus? status, CancellationToken token)
+        {
+            var query = WorkflowDefinitions.AsQueryable();
+            if (status.HasValue)
+            {
+                query = query.Where(d => d.Status == status.Value);
+            }
+            return await query
+                .OrderByDescending(d => d.ModifiedDate)
+                .Select(d => new WorkflowDefinitionSummary(d.Id, d.Name, d.RawFormat, d.Status, d.ModifiedDate))
+                .ToListAsync(token);
+        }
+
+        public Task<bool> ExistsByNameAsync(string name, string? excludeId, CancellationToken token)
+        {
+            return WorkflowDefinitions.AnyAsync(d =>
+                d.Name.ToLower() == name.ToLower()
+                && (excludeId == null || d.Id != excludeId), token);
+        }
         public async Task<IOperationResult> CreateAsync(WorkflowDefinition workflowDefinition, CancellationToken token)
         {
             try

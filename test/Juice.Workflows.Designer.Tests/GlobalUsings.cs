@@ -1,0 +1,14 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using FluentAssertions;
+global using Juice.MediatR;
+global using Juice.Services;
+global using Juice.Workflows.Designer.Commands;
+global using Juice.Workflows.Domain.AggregatesModel.DefinitionAggregate;
+global using Juice.Workflows.Execution;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
+global using Xunit;

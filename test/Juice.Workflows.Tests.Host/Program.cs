@@ -2,6 +2,7 @@
 using Juice.EF.Extensions;
 using Juice.Services;
 using Juice.Workflows;
+using Juice.Workflows.Designer.Commands;
 using Juice.Workflows.Api;
 using Juice.Workflows.Api.Contracts.IntegrationEvents.Events;
 using Juice.Workflows.Domain.AggregatesModel.WorkflowStateAggregate;
@@ -28,6 +29,14 @@ ConfigureIntegrations(builder.Services, builder.Configuration);
 RegisterWorkflow(builder.Services, workflowId);
 
 // Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Workflow Designer API", Version = "v1" });
+});
+
+builder.Services.AddWorkflowDesigner();
 builder.Services.AddGrpc(o => o.EnableDetailedErrors = true);
 
 var app = builder.Build();
@@ -76,6 +85,10 @@ app.MapGet("/resume", async (context) =>
     await context.Response.WriteAsync(JsonConvert.SerializeObject(rs));
 });
 
+app.UseSwagger();
+app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Workflow Designer API v1"));
+
+app.MapControllers();
 app.MapWorkflowGrpcServices();
 
 app.Run();
