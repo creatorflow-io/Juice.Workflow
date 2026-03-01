@@ -30,5 +30,26 @@
             _definitions[workflowDefinition.Id] = workflowDefinition;
             return Task.FromResult(OperationResult.Success);
         }
+
+        public Task<IEnumerable<WorkflowDefinitionSummary>> ListAsync(WorkflowDefinitionStatus? status, CancellationToken token)
+        {
+            var query = _definitions.Values.AsEnumerable();
+            if (status.HasValue)
+            {
+                query = query.Where(d => d.Status == status.Value);
+            }
+            var summaries = query
+                .OrderByDescending(d => d.ModifiedDate)
+                .Select(d => new WorkflowDefinitionSummary(d.Id, d.Name, d.RawFormat, d.Status, d.ModifiedDate));
+            return Task.FromResult(summaries);
+        }
+
+        public Task<bool> ExistsByNameAsync(string name, string? excludeId, CancellationToken token)
+        {
+            var exists = _definitions.Values.Any(d =>
+                string.Equals(d.Name, name, StringComparison.OrdinalIgnoreCase)
+                && (excludeId == null || d.Id != excludeId));
+            return Task.FromResult(exists);
+        }
     }
 }

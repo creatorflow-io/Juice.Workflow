@@ -12,9 +12,11 @@
         <PackageReference Include="Juice.Messaging.Outbox.Delivery" Version="$(JuiceVersion)" />
         <PackageReference Include="Juice.Messaging.Idempotency.Redis" Version="$(JuiceVersion)" />
         <PackageReference Include="Juice.EventBus.RabbitMQ" Version="$(JuiceVersion)" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\Juice.Workflows.Api\Juice.Workflows.Api.csproj" />
+        <ProjectReference Include="..\..\src\Juice.Workflows.Designer\Juice.Workflows.Designer.csproj" />
         <ProjectReference Include="..\..\src\Juice.Workflows.EF.PostgreSQL\Juice.Workflows.EF.PostgreSQL.csproj" />
         <ProjectReference Include="..\..\src\Juice.Workflows.EF.SqlServer\Juice.Workflows.EF.SqlServer.csproj" />
     </ItemGroup>
@@ -28,6 +30,12 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="appsettings.Development.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

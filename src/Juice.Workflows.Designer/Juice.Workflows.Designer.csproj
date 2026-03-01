@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Description>Workflow designer backend — REST API controllers and MediatR command handlers for workflow definition management</Description>
+    </PropertyGroup>
+
+    <ItemGroup Label="AspNetCore">
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Juice.MediatR.Behaviors" Version="$(JuiceVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Juice.Workflows\Juice.Workflows.csproj" />
+        <ProjectReference Include="..\Juice.Workflows.Bpmn\Juice.Workflows.Bpmn.csproj" />
+        <ProjectReference Include="..\Juice.Workflows.Yaml\Juice.Workflows.Yaml.csproj" />
+        <ProjectReference Include="..\Juice.Workflows.EF\Juice.Workflows.EF.csproj" />
+    </ItemGroup>
+
+</Project>

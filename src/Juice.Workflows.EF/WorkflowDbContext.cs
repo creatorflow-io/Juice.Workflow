@@ -27,6 +27,10 @@ namespace Juice.Workflows.EF
                 entity.Property(e => e.Id).HasMaxLength(Constants.IdentityLength);
 
                 entity.Property(e => e.RawFormat).HasMaxLength(Constants.NameLength);
+
+                entity.Property(e => e.Status)
+                    .HasConversion<int>()
+                    .HasDefaultValue(WorkflowDefinitionStatus.Draft);
             });
 
             modelBuilder.Entity<WorkflowRecord>(entity =>

@@ -22,6 +22,47 @@ namespace Juice.Workflows.Domain.AggregatesModel.DefinitionAggregate
         /// Parsed data that ready to execute
         /// </summary>
         public string? Data { get; private set; }
+        /// <summary>
+        /// Lifecycle status: Draft (default) → Active (via Publish) → Archived
+        /// </summary>
+        public WorkflowDefinitionStatus Status { get; private set; } = WorkflowDefinitionStatus.Draft;
+
+        /// <summary>
+        /// Promotes Draft → Active. Throws if status is not Draft or if Data has not been set.
+        /// </summary>
+        public void Publish()
+        {
+            if (Status != WorkflowDefinitionStatus.Draft)
+            {
+                throw new InvalidOperationException($"Only Draft definitions can be published. Current status: {Status}.");
+            }
+            if (string.IsNullOrEmpty(Data))
+            {
+                throw new InvalidOperationException("Definition has no execution data. Save the definition before publishing.");
+            }
+            Status = WorkflowDefinitionStatus.Active;
+        }
+
+        /// <summary>
+        /// Retires Active → Archived. Throws if status is not Active.
+        /// </summary>
+        public void Archive()
+        {
+            if (Status != WorkflowDefinitionStatus.Active)
+            {
+                throw new InvalidOperationException($"Only Active definitions can be archived. Current status: {Status}.");
+            }
+            Status = WorkflowDefinitionStatus.Archived;
+        }
+
+        /// <summary>
+        /// Updates the display name.
+        /// </summary>
+        public void Rename(string newName)
+        {
+            if (string.IsNullOrWhiteSpace(newName)) throw new ArgumentException("Name cannot be empty.", nameof(newName));
+            Name = newName;
+        }
 
         public void UpdateRawData(string rawData, string rawFormat)
         {
