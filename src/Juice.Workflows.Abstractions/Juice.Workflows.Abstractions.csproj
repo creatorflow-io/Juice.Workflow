@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Description>Workflow abstractions — contracts for custom node and repository implementations</Description>
+    </PropertyGroup>
+
+    <ItemGroup Label="AspNetCore">
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+
+        <PackageReference Include="Juice" Version="$(JuiceVersion)" />
+        <PackageReference Include="Juice.MediatR" Version="$(JuiceVersion)" />
+    </ItemGroup>
+
+</Project>

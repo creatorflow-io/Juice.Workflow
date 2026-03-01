@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Juice.Workflows\Juice.Workflows.csproj" />
+        <ProjectReference Include="..\Juice.Workflows.Abstractions\Juice.Workflows.Abstractions.csproj" />
         <ProjectReference Include="..\Juice.Workflows.Bpmn\Juice.Workflows.Bpmn.csproj" />
         <ProjectReference Include="..\Juice.Workflows.Yaml\Juice.Workflows.Yaml.csproj" />
         <ProjectReference Include="..\Juice.Workflows.EF\Juice.Workflows.EF.csproj" />

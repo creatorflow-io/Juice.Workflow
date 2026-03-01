@@ -66,6 +66,10 @@ namespace Juice.Workflows.Tests
             using var scope = resolver.ServiceProvider.CreateScope();
 
             var wfContext = scope.ServiceProvider.GetRequiredService<WorkflowDbContext>();
+            var migrations = await wfContext.Database.GetPendingMigrationsAsync();
+            var appliedMigrations = await wfContext.Database.GetAppliedMigrationsAsync();
+            _output.WriteLine($"Pending Migrations for WorkflowDbContext: {string.Join(", ", migrations)}");
+            _output.WriteLine($"Applied Migrations for WorkflowDbContext: {string.Join(", ", appliedMigrations)}");
             await wfContext.MigrateAsync();
 
             var wfPersistContext = scope.ServiceProvider.GetRequiredService<WorkflowPersistDbContext>();
