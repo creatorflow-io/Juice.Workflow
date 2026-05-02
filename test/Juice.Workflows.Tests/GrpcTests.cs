@@ -5,13 +5,13 @@ using Juice.XUnit;
 
 namespace Juice.Workflows.Tests
 {
-    [TestCaseOrderer("Juice.XUnit.PriorityOrderer", "Juice.XUnit")]
+    [TestCaseOrderer(typeof(PriorityOrderer))]
     public class GrpcTests
     {
         private ITestOutputHelper _output;
-        static string _correlationId = StringIdGenerator.Instance.GenerateRandomId(8);
+        private static string _correlationId = StringIdGenerator.Instance.GenerateRandomId(8);
         private string _definitionId = "incodeWf";
-        static string _workflowId = "";
+        private static string _workflowId = "";
         private string _grpcEndpoint = "https://localhost:7228";
 
         public GrpcTests(ITestOutputHelper output)

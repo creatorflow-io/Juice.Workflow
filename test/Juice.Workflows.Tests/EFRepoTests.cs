@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Juice.Workflows.Tests
 {
-    [TestCaseOrderer("Juice.XUnit.PriorityOrderer", "Juice.XUnit")]
+    [TestCaseOrderer(typeof(PriorityOrderer))]
     public class EFRepoTests
     {
         private ITestOutputHelper _output;
