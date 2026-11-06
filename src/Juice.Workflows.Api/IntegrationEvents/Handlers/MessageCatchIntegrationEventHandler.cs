@@ -26,7 +26,8 @@ namespace Juice.Workflows.Api.IntegrationEvents.Handlers
             }
             if (@event.CallbackId.HasValue)
             {
-                await _mediator.Send(new DispatchWorkflowEventCommand(@event.CallbackId.Value, @event.IsCompleted, @event.Properties));
+                var rs = await _mediator.Send(new DispatchWorkflowEventCommand(@event.CallbackId.Value, @event.IsCompleted, @event.Properties));
+                LogIfFailed(rs, @event.CallbackId.Value);
             }
             else if (!string.IsNullOrEmpty(@event.CorrelationId))
             {
@@ -43,7 +44,8 @@ namespace Juice.Workflows.Api.IntegrationEvents.Handlers
                     {
                         if (pendingEvent.IsStartEvent)
                         {
-                            await _mediator.Send(new DispatchWorkflowEventCommand(pendingEvent.Id, @event.IsCompleted, @event.Properties));
+                            var rs = await _mediator.Send(new DispatchWorkflowEventCommand(pendingEvent.Id, @event.IsCompleted, @event.Properties));
+                            LogIfFailed(rs, pendingEvent.Id);
                         }
                         else
                         {
@@ -52,6 +54,7 @@ namespace Juice.Workflows.Api.IntegrationEvents.Handlers
                                 var rs = await _mediator.Send(new DispatchWorkflowEventCommand(pendingEvent.Id, @event.IsCompleted, @event.Properties));
                                 if (!rs.Succeeded)
                                 {
+                                    LogIfFailed(rs, pendingEvent.Id);
                                     processedWorkflowIds.Remove(pendingEvent.WorkflowId);
                                 }
                             }
@@ -68,6 +71,15 @@ namespace Juice.Workflows.Api.IntegrationEvents.Handlers
                 {
                     _logger.LogDebug("No pending event found with CatchingKey {CatchingKey} and CorrelationId {CorrelationId}", @event.Key, @event.CorrelationId);
                 }
+            }
+        }
+
+        // The message is acknowledged either way: retrying would dispatch again to the events that already succeeded.
+        private void LogIfFailed(IOperationResult result, Guid eventId)
+        {
+            if (!result.Succeeded)
+            {
+                _logger.LogWarning("Message catch event {EventId} was not dispatched: {Message}", eventId, result.Message);
             }
         }
     }
